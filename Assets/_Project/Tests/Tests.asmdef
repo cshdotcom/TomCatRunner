@@ -9,16 +9,15 @@
         "UnityEngine.TestRunner",
         "UnityEngine.UI",
         "Unity.TextMeshPro",
-        "VContainer",
-        "UniRx",
-        "UniTask",
-        "DOTween"
+        "com.hadashikick.vcontainer",
+        "com.cysharp.unirx",
+        "com.cysharp.unitask",
+        "com.demigiant.dotween"
     ],
     "includePlatforms": [
         "Editor",
         "Standalone",
         "WebGL",
-        "iOS",
         "Android"
     ],
     "excludePlatforms": [],
