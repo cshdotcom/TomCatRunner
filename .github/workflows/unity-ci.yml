@@ -36,11 +36,20 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Restore Unity Packages
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      - name: Restore Packages
         run: |
-          # Unity will automatically restore packages from manifest.json on first run
-          # This step ensures the package cache is warmed up
-          echo "Package restore will happen during Unity initialization"
+          /opt/unity/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run EditMode Tests
         uses: game-ci/unity-test-runner@v4
@@ -83,10 +92,20 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Restore Unity Packages
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      - name: Restore Packages
         run: |
-          # Unity will automatically restore packages from manifest.json on first run
-          echo "Package restore will happen during Unity initialization"
+          /opt/unity/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run PlayMode Tests
         uses: game-ci/unity-test-runner@v4
@@ -131,8 +150,16 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Restore Unity Packages
-        run: echo "Package restore will happen during Unity initialization"
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
       - name: Build Windows Standalone
         uses: game-ci/unity-builder@v4
@@ -181,8 +208,17 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Restore Unity Packages
-        run: echo "Package restore will happen during Unity initialization"
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+          customParameters: -module WebGL
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
       - name: Build WebGL
         uses: game-ci/unity-builder@v4
@@ -231,8 +267,17 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Restore Unity Packages
-        run: echo "Package restore will happen during Unity initialization"
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+          customParameters: -module Android
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -358,8 +403,20 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Restore Unity Packages
-        run: echo "Package restore will happen during Unity initialization"
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      - name: Restore Packages
+        run: |
+          /opt/unity/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run Performance Tests
         uses: game-ci/unity-test-runner@v4
