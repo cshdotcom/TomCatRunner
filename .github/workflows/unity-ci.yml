@@ -37,13 +37,13 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Setup Unity
-        uses: game-ci/unity-installer@v4
+        uses: game-ci/unity-installer@v2
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v4
+        uses: game-ci/unity-activate@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
@@ -52,7 +52,7 @@ jobs:
           /opt/unity/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run EditMode Tests
-        uses: game-ci/unity-test-runner@v4
+        uses: game-ci/unity-test-runner@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
@@ -93,13 +93,13 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Setup Unity
-        uses: game-ci/unity-installer@v4
+        uses: game-ci/unity-installer@v2
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v4
+        uses: game-ci/unity-activate@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
@@ -151,18 +151,18 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Setup Unity
-        uses: game-ci/unity-installer@v4
+        uses: game-ci/unity-installer@v2
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v4
+        uses: game-ci/unity-activate@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
       - name: Build Windows Standalone
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
@@ -216,12 +216,12 @@ jobs:
           customParameters: -module WebGL
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v4
+        uses: game-ci/unity-activate@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
       - name: Build WebGL
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
@@ -275,25 +275,25 @@ jobs:
           customParameters: -module Android
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v4
+        uses: game-ci/unity-activate@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v2
         with:
           api-level: 33
           ndk-version: r26c
           cmdline-tools-version: latest
 
       - name: Build Android APK
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
@@ -404,13 +404,13 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Setup Unity
-        uses: game-ci/unity-installer@v4
+        uses: game-ci/unity-installer@v2
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v4
+        uses: game-ci/unity-activate@v2
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
 
