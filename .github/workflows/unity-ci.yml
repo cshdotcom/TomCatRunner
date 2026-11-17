@@ -38,16 +38,32 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+        run: |
+          # Install Unity using official Unity Hub apt repository
+          echo "Installing Unity Hub and Unity Editor via apt..."
+          
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Install Unity via Unity Hub CLI
+          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
+          else
+            echo "Unity binary not found"
+            exit 1
+          fi
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
 
       - name: Restore Packages
         run: |
@@ -96,16 +112,32 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+        run: |
+          # Install Unity using official Unity Hub apt repository
+          echo "Installing Unity Hub and Unity Editor via apt..."
+          
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Install Unity via Unity Hub CLI
+          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
+          else
+            echo "Unity binary not found"
+            exit 1
+          fi
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
 
       - name: Restore Packages
         run: |
@@ -156,14 +188,32 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+        run: |
+          # Install Unity using official Unity Hub apt repository
+          echo "Installing Unity Hub and Unity Editor via apt..."
+          
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Install Unity via Unity Hub CLI
+          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
+          else
+            echo "Unity binary not found"
+            exit 1
+          fi
 
       - name: Activate Unity License
         run: |
-          & "C:\Unity\Editor\${env:UNITY_VERSION}\Editor\Unity.exe" -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit
+          & "C:\Program Files\Unity\Hub\Editor\${env:UNITY_VERSION}\Editor\Unity.exe" -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit
 
       - name: Build Windows Standalone
         uses: game-ci/unity-builder@v2
@@ -214,16 +264,32 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+        run: |
+          # Install Unity using official Unity Hub apt repository
+          echo "Installing Unity Hub and Unity Editor via apt..."
+          
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Install Unity via Unity Hub CLI
+          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
+          else
+            echo "Unity binary not found"
+            exit 1
+          fi
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
 
       - name: Build WebGL
         uses: game-ci/unity-builder@v2
@@ -274,16 +340,32 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+        run: |
+          # Install Unity using official Unity Hub apt repository
+          echo "Installing Unity Hub and Unity Editor via apt..."
+          
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Install Unity via Unity Hub CLI
+          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
+          else
+            echo "Unity binary not found"
+            exit 1
+          fi
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -411,16 +493,32 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+        run: |
+          # Install Unity using official Unity Hub apt repository
+          echo "Installing Unity Hub and Unity Editor via apt..."
+          
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Install Unity via Unity Hub CLI
+          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
+          else
+            echo "Unity binary not found"
+            exit 1
+          fi
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
 
       - name: Restore Packages
         run: |
