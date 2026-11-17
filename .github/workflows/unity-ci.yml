@@ -9,7 +9,8 @@ on:
 
 env:
   UNITY_VERSION: 2022.3.21f1
-  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
   PROJECT_PATH: .
   BUILD_PATH: Builds
 
@@ -45,7 +46,8 @@ jobs:
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Restore Packages
         run: |
@@ -54,7 +56,8 @@ jobs:
       - name: Run EditMode Tests
         uses: game-ci/unity-test-runner@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           projectPath: ${{ env.PROJECT_PATH }}
@@ -101,7 +104,8 @@ jobs:
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Restore Packages
         run: |
@@ -110,7 +114,8 @@ jobs:
       - name: Run PlayMode Tests
         uses: game-ci/unity-test-runner@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           projectPath: ${{ env.PROJECT_PATH }}
@@ -159,12 +164,14 @@ jobs:
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Build Windows Standalone
         uses: game-ci/unity-builder@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           projectPath: ${{ env.PROJECT_PATH }}
@@ -218,12 +225,14 @@ jobs:
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Build WebGL
         uses: game-ci/unity-builder@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           projectPath: ${{ env.PROJECT_PATH }}
@@ -277,7 +286,8 @@ jobs:
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -295,7 +305,8 @@ jobs:
       - name: Build Android APK
         uses: game-ci/unity-builder@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           projectPath: ${{ env.PROJECT_PATH }}
@@ -412,7 +423,8 @@ jobs:
       - name: Activate Unity License
         uses: game-ci/unity-activate@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Restore Packages
         run: |
@@ -421,7 +433,8 @@ jobs:
       - name: Run Performance Tests
         uses: game-ci/unity-test-runner@v2
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           projectPath: ${{ env.PROJECT_PATH }}
