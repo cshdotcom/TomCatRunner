@@ -115,25 +115,33 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Download Unity tar.xz - correct URL format for Unity 2022.3.x
-          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/Unity.tar.xz"
-          echo "Downloading Unity from: $UNITY_URL"
+          # Install Unity via official Unity Hub apt repository (most reliable)
+          echo "Installing Unity Hub and Unity Editor via apt..."
           
-          if curl -fsSL "$UNITY_URL" -o unity-editor.tar.xz; then
-            echo "Downloaded tar.xz successfully"
-            mkdir -p /opt/unity/Editor/2022.3.21f1
-            tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
-            echo "Unity extracted successfully"
-            # Verify installation
-            if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified"
-              /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-            else
-              echo "Unity binary not found after extraction"
-              exit 1
-            fi
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          sudo tee /etc/apt/sources.list.d/unityhub.sources > /dev/null << EOF
+Types: deb
+URIs: https://hub.unity3d.com/linux/repos/deb
+Suites: stable
+Components: main
+Signed-By: /etc/apt/keyrings/unityhub.gpg
+EOF
+          
+          # Update and install Unity Hub
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Use Unity Hub to install specific Unity version
+          /opt/unityhub/unityhub -- --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Failed to download Unity tar.xz"
+            echo "Unity binary not found after installation"
             exit 1
           fi
 
@@ -233,25 +241,33 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Download Unity tar.xz - correct URL format for Unity 2022.3.x
-          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/Unity.tar.xz"
-          echo "Downloading Unity from: $UNITY_URL"
+          # Install Unity via official Unity Hub apt repository (most reliable)
+          echo "Installing Unity Hub and Unity Editor via apt..."
           
-          if curl -fsSL "$UNITY_URL" -o unity-editor.tar.xz; then
-            echo "Downloaded tar.xz successfully"
-            mkdir -p /opt/unity/Editor/2022.3.21f1
-            tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
-            echo "Unity extracted successfully"
-            # Verify installation
-            if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified"
-              /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-            else
-              echo "Unity binary not found after extraction"
-              exit 1
-            fi
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          sudo tee /etc/apt/sources.list.d/unityhub.sources > /dev/null << EOF
+Types: deb
+URIs: https://hub.unity3d.com/linux/repos/deb
+Suites: stable
+Components: main
+Signed-By: /etc/apt/keyrings/unityhub.gpg
+EOF
+          
+          # Update and install Unity Hub
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Use Unity Hub to install specific Unity version
+          /opt/unityhub/unityhub -- --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Failed to download Unity tar.xz"
+            echo "Unity binary not found after installation"
             exit 1
           fi
 
@@ -301,25 +317,33 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Download Unity tar.xz - correct URL format for Unity 2022.3.x
-          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/Unity.tar.xz"
-          echo "Downloading Unity from: $UNITY_URL"
+          # Install Unity via official Unity Hub apt repository (most reliable)
+          echo "Installing Unity Hub and Unity Editor via apt..."
           
-          if curl -fsSL "$UNITY_URL" -o unity-editor.tar.xz; then
-            echo "Downloaded tar.xz successfully"
-            mkdir -p /opt/unity/Editor/2022.3.21f1
-            tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
-            echo "Unity extracted successfully"
-            # Verify installation
-            if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified"
-              /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-            else
-              echo "Unity binary not found after extraction"
-              exit 1
-            fi
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          sudo tee /etc/apt/sources.list.d/unityhub.sources > /dev/null << EOF
+Types: deb
+URIs: https://hub.unity3d.com/linux/repos/deb
+Suites: stable
+Components: main
+Signed-By: /etc/apt/keyrings/unityhub.gpg
+EOF
+          
+          # Update and install Unity Hub
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Use Unity Hub to install specific Unity version
+          /opt/unityhub/unityhub -- --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Failed to download Unity tar.xz"
+            echo "Unity binary not found after installation"
             exit 1
           fi
 
@@ -446,25 +470,33 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Download Unity tar.xz - correct URL format for Unity 2022.3.x
-          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/Unity.tar.xz"
-          echo "Downloading Unity from: $UNITY_URL"
+          # Install Unity via official Unity Hub apt repository (most reliable)
+          echo "Installing Unity Hub and Unity Editor via apt..."
           
-          if curl -fsSL "$UNITY_URL" -o unity-editor.tar.xz; then
-            echo "Downloaded tar.xz successfully"
-            mkdir -p /opt/unity/Editor/2022.3.21f1
-            tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
-            echo "Unity extracted successfully"
-            # Verify installation
-            if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified"
-              /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-            else
-              echo "Unity binary not found after extraction"
-              exit 1
-            fi
+          # Add Unity Hub repository
+          sudo install -d /etc/apt/keyrings
+          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
+          sudo tee /etc/apt/sources.list.d/unityhub.sources > /dev/null << EOF
+Types: deb
+URIs: https://hub.unity3d.com/linux/repos/deb
+Suites: stable
+Components: main
+Signed-By: /etc/apt/keyrings/unityhub.gpg
+EOF
+          
+          # Update and install Unity Hub
+          sudo apt update
+          sudo apt install -y unityhub
+          
+          # Use Unity Hub to install specific Unity version
+          /opt/unityhub/unityhub -- --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          
+          # Verify installation
+          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+            echo "Unity installation verified"
+            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Failed to download Unity tar.xz"
+            echo "Unity binary not found after installation"
             exit 1
           fi
 
