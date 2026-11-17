@@ -1,0 +1,13 @@
+{
+  "name": "TomCatRunner.Core.Runtime",
+  "references": [
+    "TomCatRunner.Common.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": []
+}

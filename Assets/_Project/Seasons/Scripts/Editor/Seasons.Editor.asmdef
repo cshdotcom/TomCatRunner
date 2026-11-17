@@ -1,0 +1,14 @@
+{
+  "name": "TomCatRunner.Seasons.Editor",
+  "references": [
+    "TomCatRunner.Seasons.Runtime",
+    "TomCatRunner.Core.Editor"
+  ],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": []
+}

@@ -1,0 +1,401 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main, develop]
+
+env:
+  UNITY_VERSION: 2022.3.15f1
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  PROJECT_PATH: .
+  BUILD_PATH: Builds
+  WEBGL_BUILD_PATH: Builds/WebGL
+  WINDOWS_BUILD_PATH: Builds/Windows
+
+jobs:
+  # ==================== 代码质量检查 ====================
+  lint-and-test:
+    name: Lint & Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: |
+            Library
+            Temp
+          key: unity-library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            unity-library-${{ runner.os }}-
+
+      - name: Run Unity Editor Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: editmode
+          artifactsPath: Artifacts/EditMode
+          coverageOptions: generateAdditionalMetrics;generateHtmlReport;generateHtmlReportHistory
+          customParameters: -batchmode -nographics
+
+      - name: Upload EditMode Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: editmode-test-results
+          path: Artifacts/EditMode
+          retention-days: 7
+
+      - name: Run Unity PlayMode Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: playmode
+          artifactsPath: Artifacts/PlayMode
+          coverageOptions: generateAdditionalMetrics;generateHtmlReport;generateHtmlReportHistory
+          customParameters: -batchmode -nographics
+
+      - name: Upload PlayMode Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playmode-test-results
+          path: Artifacts/PlayMode
+          retention-days: 7
+
+      - name: Check Code Coverage
+        run: |
+          COVERAGE=$(cat Artifacts/PlayMode/coverage.json | jq '.coverage')
+          echo "Code coverage: $COVERAGE%"
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+            echo "::warning::Code coverage below 70%"
+          fi
+
+  # ==================== Windows 独立构建 ====================
+  build-windows:
+    name: Build Windows Standalone
+    runs-on: windows-latest
+    timeout-minutes: 60
+    needs: lint-and-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: |
+            Library
+            Temp
+          key: unity-library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            unity-library-${{ runner.os }}-
+
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      - name: Build Windows Standalone
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: StandaloneWindows64
+          buildPath: ${{ env.WINDOWS_BUILD_PATH }}
+          customParameters: -executeMethod TomCatRunner.Editor.CIBuildScript.PerformWindowsBuild
+
+      - name: Verify Build Output
+        run: |
+          $exePath = "${{ env.WINDOWS_BUILD_PATH }}/TomCatRunner.exe"
+          if (-not (Test-Path $exePath)) {
+            Write-Error "Build executable not found at $exePath"
+            exit 1
+          }
+          $fileSize = (Get-Item $exePath).Length / 1MB
+          Write-Host "Build size: $([math]::Round($fileSize, 2)) MB"
+          if ($fileSize -gt 500) {
+            Write-Warning "Build size exceeds 500 MB"
+          }
+
+      - name: Upload Windows Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: ${{ env.WINDOWS_BUILD_PATH }}/**
+          retention-days: 30
+
+  # ==================== WebGL 构建 ====================
+  build-webgl:
+    name: Build WebGL
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: lint-and-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: |
+            Library
+            Temp
+          key: unity-library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            unity-library-${{ runner.os }}-
+
+      - name: Setup Unity
+        uses: game-ci/unity-installer@v4
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+          customParameters: -module WebGL
+
+      - name: Activate Unity License
+        uses: game-ci/unity-activate@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+      - name: Build WebGL
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: WebGL
+          buildPath: ${{ env.WEBGL_BUILD_PATH }}
+          customParameters: -executeMethod TomCatRunner.Editor.CIBuildScript.PerformWebGLBuild
+
+      - name: Compress WebGL Build
+        run: |
+          cd ${{ env.WEBGL_BUILD_PATH }}
+          # 启用 Brotli 压缩
+          find . -name "*.js" -o -name "*.wasm" -o -name "*.data" -o -name "*.json" | xargs -I {} brotli -f -q 11 {}
+          find . -name "*.js" -o -name "*.wasm" -o -name "*.data" -o -name "*.json" | xargs -I {} gzip -f -9 {}
+
+      - name: Verify WebGL Build
+        run: |
+          if [ ! -f "${{ env.WEBGL_BUILD_PATH }}/index.html" ]; then
+            echo "::error::WebGL index.html not found"
+            exit 1
+          fi
+          SIZE=$(du -sh ${{ env.WEBGL_BUILD_PATH }} | cut -f1)
+          echo "WebGL build size: $SIZE"
+
+      - name: Upload WebGL Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webgl-build
+          path: ${{ env.WEBGL_BUILD_PATH }}/**
+          retention-days: 30
+
+  # ==================== 性能基准测试 ====================
+  performance-benchmarks:
+    name: Performance Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: lint-and-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: |
+            Library
+            Temp
+          key: unity-library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+
+      - name: Run Performance Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: playmode
+          testNames: "TomCatRunner.Tests.Performance.PerformanceBenchmarks"
+          artifactsPath: Artifacts/Performance
+          customParameters: -batchmode -nographics
+
+      - name: Parse Performance Results
+        run: |
+          if [ -f "Artifacts/Performance/test-results.xml" ]; then
+            echo "## Performance Benchmark Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Test | Duration | Status |" >> $GITHUB_STEP_SUMMARY
+            echo "|------|----------|--------|" >> $GITHUB_STEP_SUMMARY
+            # 解析 XML 结果
+            python3 -c "
+import xml.etree.ElementTree as ET
+tree = ET.parse('Artifacts/Performance/test-results.xml')
+root = tree.getroot()
+for test in root.findall('.//test-case'):
+    name = test.get('name', '').split('.')[-1]
+    time = test.get('time', '0')
+    result = test.get('result', 'Unknown')
+    print(f'| {name} | {float(time)*1000:.1f}ms | {result} |')
+            " >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload Performance Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-results
+          path: Artifacts/Performance
+          retention-days: 7
+
+  # ==================== 地址资源构建 ====================
+  build-addressables:
+    name: Build Addressables
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: lint-and-test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: |
+            Library
+            Temp
+          key: unity-library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+
+      - name: Build Addressables Content
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: StandaloneWindows64
+          buildPath: Builds/Addressables
+          customParameters: -executeMethod TomCatRunner.Editor.CIBuildScript.BuildAddressablesContent
+
+      - name: Verify Addressables Catalog
+        run: |
+          if [ ! -f "Builds/Addressables/catalog.json" ]; then
+            echo "::error::Addressables catalog not found"
+            exit 1
+          fi
+          echo "Addressables catalog verified"
+
+      - name: Upload Addressables Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: addressables-build
+          path: Builds/Addressables/**
+          retention-days: 30
+
+  # ==================== 发布准备 ====================
+  prepare-release:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build-windows, build-webgl, build-addressables, performance-benchmarks]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Download Windows Build
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: Release/Windows
+
+      - name: Download WebGL Build
+        uses: actions/download-artifact@v4
+        with:
+          name: webgl-build
+          path: Release/WebGL
+
+      - name: Download Addressables
+        uses: actions/download-artifact@v4
+        with:
+          name: addressables-build
+          path: Release/Addressables
+
+      - name: Generate Changelog
+        id: changelog
+        uses: mikepenz/release-changelog-builder-action@v4
+        with:
+          configuration: .github/changelog-config.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Release/Windows/**
+            Release/WebGL/**
+            Release/Addressables/**
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-beta') || contains(github.ref, '-alpha') }}
+          generate_release_notes: false
+
+  # ==================== 部署到 GitHub Pages (WebGL) ====================
+  deploy-webgl:
+    name: Deploy WebGL to GitHub Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build-webgl
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Download WebGL Build
+        uses: actions/download-artifact@v4
+        with:
+          name: webgl-build
+          path: webgl-build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: webgl-build
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

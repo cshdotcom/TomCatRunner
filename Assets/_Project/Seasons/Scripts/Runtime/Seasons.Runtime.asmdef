@@ -1,0 +1,15 @@
+{
+  "name": "TomCatRunner.Seasons.Runtime",
+  "references": [
+    "TomCatRunner.Core.Runtime",
+    "TomCatRunner.Common.Runtime",
+    "TomCatRunner.UI.Runtime"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": []
+}

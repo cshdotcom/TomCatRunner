@@ -1,0 +1,13 @@
+{
+  "name": "TomCatRunner.Core.Editor",
+  "references": [
+    "TomCatRunner.Core.Runtime"
+  ],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": []
+}

@@ -1,0 +1,55 @@
+# Unity generated files
+[Ll]ibrary/
+[Oo]bj/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emory[Cc]apture/
+
+# Unity Editor
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# VS/IDE
+.vs/
+*.csproj
+*.sln
+*.userprefs
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Addressables
+Library/com.unity.addressables/
+
+# Build outputs
+Builds/
+*.apk
+*.aab
+*.ipa
+
+# Temp
+Temp/
+*.tmp
+*.temp
+
+# Package cache
+Packages/
+*.manifest

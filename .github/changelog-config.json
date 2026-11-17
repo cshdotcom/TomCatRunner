@@ -1,0 +1,33 @@
+{
+  "categories": [
+    {
+      "title": "🚀 Features",
+      "labels": ["feature", "feat", "enhancement"]
+    },
+    {
+      "title": "🐛 Bug Fixes",
+      "labels": ["bug", "fix", "bugfix"]
+    },
+    {
+      "title": "📝 Documentation",
+      "labels": ["docs", "documentation", "readme"]
+    },
+    {
+      "title": "⚡ Performance",
+      "labels": ["performance", "perf", "optimization"]
+    },
+    {
+      "title": "🔧 Maintenance",
+      "labels": ["chore", "maintenance", "refactor", "ci", "build"]
+    },
+    {
+      "title": "🎨 UI/UX",
+      "labels": ["ui", "ux", "design", "animation", "shader"]
+    },
+    {
+      "title": "🧪 Tests",
+      "labels": ["test", "testing", "qa"]
+    }
+  ],
+  "template": "# {{version}} ({{date}})\n\n{{#each categories}}\n## {{title}}\n{{#each commits}}\n- {{message}} ([#{{number}}]({{url}}))\n{{/each}}\n\n{{/each}}\n---\n*Full changelog: [compare]({{compareUrl}})*"
+}

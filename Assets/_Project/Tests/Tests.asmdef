@@ -1,0 +1,35 @@
+{
+    "name": "TomCatRunner.Tests",
+    "rootNamespace": "TomCatRunner.Tests",
+    "references": [
+        "TomCatRunner.Seasons.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Common.Runtime",
+        "UnityEngine.TestRunner",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "VContainer",
+        "UniRx",
+        "UniTask",
+        "DOTween"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "Standalone",
+        "WebGL",
+        "iOS",
+        "Android"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "UnityEngine.TestRunner",
+        "Unity.TestTools.CodeCoverage"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

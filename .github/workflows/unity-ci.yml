@@ -1,0 +1,409 @@
+name: Unity CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  UNITY_VERSION: 2022.3.21f1
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  PROJECT_PATH: .
+  BUILD_PATH: Builds
+
+jobs:
+  # ============================================
+  # EDIT MODE TESTS
+  # ============================================
+  editmode-tests:
+    name: EditMode Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            Library-${{ runner.os }}-
+
+      - name: Run EditMode Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: editmode
+          artifactsPath: artifacts/editmode
+          customParameters: -batchmode -nographics -logFile -
+
+      - name: Upload EditMode Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: editmode-test-results
+          path: artifacts/editmode
+          retention-days: 7
+
+  # ============================================
+  # PLAY MODE TESTS
+  # ============================================
+  playmode-tests:
+    name: PlayMode Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            Library-${{ runner.os }}-
+
+      - name: Run PlayMode Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: playmode
+          artifactsPath: artifacts/playmode
+          customParameters: -batchmode -nographics -logFile -
+
+      - name: Upload PlayMode Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playmode-test-results
+          path: artifacts/playmode
+          retention-days: 7
+
+  # ============================================
+  # WINDOWS STANDALONE BUILD
+  # ============================================
+  build-windows:
+    name: Build Windows Standalone
+    runs-on: windows-latest
+    timeout-minutes: 60
+    needs: [editmode-tests, playmode-tests]
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            Library-${{ runner.os }}-
+
+      - name: Build Windows Standalone
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: StandaloneWindows64
+          buildPath: ${{ env.BUILD_PATH }}/Windows/TomCatRunner.exe
+          customParameters: -batchmode -nographics -logFile -
+
+      - name: Compress Build
+        run: |
+          cd ${{ env.BUILD_PATH }}/Windows
+          7z a -tzip TomCatRunner_Windows.zip .\*
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: TomCatRunner-Windows
+          path: ${{ env.BUILD_PATH }}/Windows/TomCatRunner_Windows.zip
+          retention-days: 30
+
+  # ============================================
+  # WEBGL BUILD
+  # ============================================
+  build-webgl:
+    name: Build WebGL
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: [editmode-tests, playmode-tests]
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            Library-${{ runner.os }}-
+
+      - name: Build WebGL
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: WebGL
+          buildPath: ${{ env.BUILD_PATH }}/WebGL
+          customParameters: -batchmode -nographics -logFile -
+
+      - name: Compress WebGL Build
+        run: |
+          cd ${{ env.BUILD_PATH }}
+          zip -r TomCatRunner_WebGL.zip WebGL
+
+      - name: Upload WebGL Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: TomCatRunner-WebGL
+          path: ${{ env.BUILD_PATH }}/TomCatRunner_WebGL.zip
+          retention-days: 30
+
+  # ============================================
+  # ANDROID BUILD
+  # ============================================
+  build-android:
+    name: Build Android (AAB)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: [editmode-tests, playmode-tests]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            Library-${{ runner.os }}-
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          api-level: 33
+          ndk-version: r26c
+          cmdline-tools-version: latest
+
+      - name: Build Android AAB
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: Android
+          buildPath: ${{ env.BUILD_PATH }}/Android/TomCatRunner.aab
+          customParameters: -batchmode -nographics -logFile -
+
+      - name: Upload Android AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: TomCatRunner-Android
+          path: ${{ env.BUILD_PATH }}/Android/TomCatRunner.aab
+          retention-days: 30
+
+  # ============================================
+  # iOS BUILD (requires macOS runner)
+  # ============================================
+  build-ios:
+    name: Build iOS (Xcode Project)
+    runs-on: macos-latest
+    timeout-minutes: 60
+    needs: [editmode-tests, playmode-tests]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            Library-${{ runner.os }}-
+
+      - name: Build iOS
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: iOS
+          buildPath: ${{ env.BUILD_PATH }}/iOS
+          customParameters: -batchmode -nographics -logFile -
+
+      - name: Upload iOS Xcode Project
+        uses: actions/upload-artifact@v4
+        with:
+          name: TomCatRunner-iOS
+          path: ${{ env.BUILD_PATH }}/iOS
+          retention-days: 30
+
+  # ============================================
+  # RELEASE CREATION
+  # ============================================
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [build-windows, build-webgl, build-android, build-ios]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download Windows Build
+        uses: actions/download-artifact@v4
+        with:
+          name: TomCatRunner-Windows
+          path: artifacts/Windows
+
+      - name: Download WebGL Build
+        uses: actions/download-artifact@v4
+        with:
+          name: TomCatRunner-WebGL
+          path: artifacts/WebGL
+
+      - name: Download Android Build
+        uses: actions/download-artifact@v4
+        with:
+          name: TomCatRunner-Android
+          path: artifacts/Android
+
+      - name: Download iOS Build
+        uses: actions/download-artifact@v4
+        with:
+          name: TomCatRunner-iOS
+          path: artifacts/iOS
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          git log --pretty=format:"- %s (%an)" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: TomCatRunner ${{ github.ref_name }}
+          body: |
+            ## 🎮 汤姆猫跑酷 - ${{ github.ref_name }}
+            
+            ### 📦 下载链接
+            - **Windows 64位**: [TomCatRunner_Windows.zip](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/TomCatRunner_Windows.zip)
+            - **WebGL (浏览器游玩)**: [TomCatRunner_WebGL.zip](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/TomCatRunner_WebGL.zip)
+            - **Android (AAB)**: [TomCatRunner.aab](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/TomCatRunner.aab)
+            - **iOS (Xcode Project)**: [TomCatRunner_iOS.zip](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/TomCatRunner_iOS.zip)
+            
+            ### 📝 更新日志
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ### 🎯 功能特性
+            - 多主题赛季系统 (春季/夏季/秋季/冬季/节日)
+            - 程序化关卡生成 (CFG + 马尔可夫链)
+            - 双轨战斗通行证 (免费/付费)
+            - Addressables 热更管线
+            - 绚丽 UI 系统 (SDF圆角/流体噪波/色差/全息扫描/边缘发光)
+            - UI 粒子系统 (7种预设)
+            - MotionLibrary 50+ 动画预设
+            - AutoRunnerBot AI 关卡验证
+            - 完整测试覆盖 (EditMode/PlayMode/性能基准)
+          draft: false
+          prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+          files: |
+            artifacts/Windows/TomCatRunner_Windows.zip
+            artifacts/WebGL/TomCatRunner_WebGL.zip
+            artifacts/Android/TomCatRunner.aab
+            artifacts/iOS/**
+
+  # ============================================
+  # PERFORMANCE BENCHMARK
+  # ============================================
+  performance-benchmark:
+    name: Performance Benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: 0
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
+          restore-keys: |
+            Library-${{ runner.os }}-
+
+      - name: Run Performance Tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: playmode
+          categoryFilter: Performance
+          artifactsPath: artifacts/performance
+          customParameters: -batchmode -nographics -logFile -
+
+      - name: Upload Performance Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-results
+          path: artifacts/performance
+          retention-days: 30
