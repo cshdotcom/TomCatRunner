@@ -36,31 +36,24 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Setup Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+      - name: Install Unity
+        run: |
+          # Install Unity Hub and Unity Editor
+          wget -qO- https://download.unity3d.com/download_unity/unity-editor-installer-${UNITY_VERSION}.sh | sh -s -- --components=unity-editor,unity-android,unity-webgl --install-location=/opt/unity/Editor/${UNITY_VERSION}
+          # Or use the Unity installer script
+          curl -fsSL https://get.unity3d.com/download_unity/installers/unity-editor-installer-${UNITY_VERSION}.sh | sh -s -- --components=unity-editor,unity-android,unity-webgl --install-location=/opt/unity/Editor/${UNITY_VERSION}
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "" -password "" -serial "${{ secrets.UNITY_LICENSE }}" -quit
 
       - name: Restore Packages
         run: |
-          /opt/unity/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run EditMode Tests
-        uses: game-ci/unity-test-runner@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          projectPath: ${{ env.PROJECT_PATH }}
-          testMode: editmode
-          artifactsPath: artifacts/editmode
-          customParameters: -batchmode -nographics -logFile -
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -runTests -testPlatform editmode -testResults artifacts/editmode/test-results.xml -logFile -
 
       - name: Upload EditMode Test Results
         uses: actions/upload-artifact@v4
@@ -92,31 +85,21 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Setup Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+      - name: Install Unity
+        run: |
+          curl -fsSL https://get.unity3d.com/download_unity/installers/unity-editor-installer-${UNITY_VERSION}.sh | sh -s -- --components=unity-editor,unity-android,unity-webgl --install-location=/opt/unity/Editor/${UNITY_VERSION}
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "" -password "" -serial "${{ secrets.UNITY_LICENSE }}" -quit
 
       - name: Restore Packages
         run: |
-          /opt/unity/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run PlayMode Tests
-        uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          projectPath: ${{ env.PROJECT_PATH }}
-          testMode: playmode
-          artifactsPath: artifacts/playmode
-          customParameters: -batchmode -nographics -logFile -
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -runTests -testPlatform playmode -testResults artifacts/playmode/test-results.xml -logFile -
 
       - name: Upload PlayMode Test Results
         uses: actions/upload-artifact@v4
@@ -150,38 +133,31 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Setup Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+      - name: Install Unity
+        run: |
+          # Unity installer for Windows
+          $unityInstaller = "https://download.unity3d.com/download_unity/win64_unity-editor-installer-${env:UNITY_VERSION}.exe"
+          Invoke-WebRequest -Uri $unityInstaller -OutFile "unity_installer.exe"
+          Start-Process -FilePath "unity_installer.exe" -ArgumentList "/S /D=C:\Unity\Editor\${env:UNITY_VERSION} /Components=Unity-Editor,Unity-Android,Unity-WebGL" -Wait
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          & "C:\Unity\Editor\${env:UNITY_VERSION}\Editor\Unity.exe" -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "" -password "" -serial "${{ secrets.UNITY_LICENSE }}" -quit
 
       - name: Build Windows Standalone
-        uses: game-ci/unity-builder@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          projectPath: ${{ env.PROJECT_PATH }}
-          targetPlatform: StandaloneWindows64
-          buildPath: ${{ env.BUILD_PATH }}/Windows/TomCatRunner.exe
-          customParameters: -batchmode -nographics -logFile -
+        run: |
+          & "C:\Unity\Editor\${env:UNITY_VERSION}\Editor\Unity.exe" -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -buildWindows64Player "${{ env.BUILD_PATH }}\Windows\TomCatRunner.exe" -logFile - -quit
 
       - name: Compress Build
         run: |
-          cd ${{ env.BUILD_PATH }}/Windows
-          7z a -tzip TomCatRunner_Windows.zip .\*
+          cd ${{ env.BUILD_PATH }}\Windows
+          Compress-Archive -Path * -DestinationPath TomCatRunner_Windows.zip
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
         with:
           name: TomCatRunner-Windows
-          path: ${{ env.BUILD_PATH }}/Windows/TomCatRunner_Windows.zip
+          path: ${{ env.BUILD_PATH }}\Windows\TomCatRunner_Windows.zip
           retention-days: 30
 
   # ============================================
@@ -208,28 +184,17 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Setup Unity
-        uses: game-ci/unity-installer@v4
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
-          customParameters: -module WebGL
+      - name: Install Unity
+        run: |
+          curl -fsSL https://get.unity3d.com/download_unity/installers/unity-editor-installer-${UNITY_VERSION}.sh | sh -s -- --components=unity-editor,unity-android,unity-webgl --install-location=/opt/unity/Editor/${UNITY_VERSION}
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "" -password "" -serial "${{ secrets.UNITY_LICENSE }}" -quit
 
       - name: Build WebGL
-        uses: game-ci/unity-builder@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          projectPath: ${{ env.PROJECT_PATH }}
-          targetPlatform: WebGL
-          buildPath: ${{ env.BUILD_PATH }}/WebGL
-          customParameters: -batchmode -nographics -logFile -
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -buildWebGLPlayer "${{ env.BUILD_PATH }}/WebGL" -logFile - -quit
 
       - name: Compress WebGL Build
         run: |
@@ -267,17 +232,13 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Setup Unity
-        uses: game-ci/unity-installer@v4
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
-          customParameters: -module Android
+      - name: Install Unity
+        run: |
+          curl -fsSL https://get.unity3d.com/download_unity/installers/unity-editor-installer-${UNITY_VERSION}.sh | sh -s -- --components=unity-editor,unity-android,unity-webgl --install-location=/opt/unity/Editor/${UNITY_VERSION}
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "" -password "" -serial "${{ secrets.UNITY_LICENSE }}" -quit
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -293,15 +254,8 @@ jobs:
           cmdline-tools-version: latest
 
       - name: Build Android APK
-        uses: game-ci/unity-builder@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          projectPath: ${{ env.PROJECT_PATH }}
-          targetPlatform: Android
-          buildPath: ${{ env.BUILD_PATH }}/Android/TomCatRunner.apk
-          customParameters: -batchmode -nographics -logFile -executeMethod TomCatRunner.Editor.CI.CIBuildScript.SetAndroidBuildAPK
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -buildTarget Android -executeMethod TomCatRunner.Editor.CI.CIBuildScript.SetAndroidBuildAPK -buildLinux64Player "${{ env.BUILD_PATH }}/Android/TomCatRunner.apk" -logFile - -quit
 
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
@@ -403,32 +357,21 @@ jobs:
           restore-keys: |
             Library-${{ runner.os }}-
 
-      - name: Setup Unity
-        uses: game-ci/unity-installer@v2
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
+      - name: Install Unity
+        run: |
+          curl -fsSL https://get.unity3d.com/download_unity/installers/unity-editor-installer-${UNITY_VERSION}.sh | sh -s -- --components=unity-editor,unity-android,unity-webgl --install-location=/opt/unity/Editor/${UNITY_VERSION}
 
       - name: Activate Unity License
-        uses: game-ci/unity-activate@v2
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "" -password "" -serial "${{ secrets.UNITY_LICENSE }}" -quit
 
       - name: Restore Packages
         run: |
-          /opt/unity/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run Performance Tests
-        uses: game-ci/unity-test-runner@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          projectPath: ${{ env.PROJECT_PATH }}
-          testMode: playmode
-          categoryFilter: Performance
-          artifactsPath: artifacts/performance
-          customParameters: -batchmode -nographics -logFile -
+        run: |
+          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -runTests -testPlatform playmode -testResults artifacts/performance/test-results.xml -logFile -
 
       - name: Upload Performance Results
         uses: actions/upload-artifact@v4
