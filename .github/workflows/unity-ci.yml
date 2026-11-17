@@ -39,26 +39,34 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Install Unity using official Unity Hub apt repository
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity using official Unity CLI (recommended for CI)
+          echo "Installing Unity CLI and Unity Editor..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
-          sudo apt update
-          sudo apt install -y unityhub
+          # Install Unity CLI
+          curl -fsSL https://unity.com/install.sh | bash
           
-          # Install Unity via Unity Hub CLI
-          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          # Add Unity CLI to PATH
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Install Unity Editor with required modules
+          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
             echo "Unity installation verified"
             /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Unity binary not found"
-            exit 1
+            # Try alternative path
+            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+              echo "Unity installation verified (alternative path)"
+              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
+              # Create symlink for consistency
+              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
+            else
+              echo "Unity binary not found"
+              exit 1
+            fi
           fi
 
       - name: Activate Unity License
@@ -113,26 +121,34 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Install Unity using official Unity Hub apt repository
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity using official Unity CLI (recommended for CI)
+          echo "Installing Unity CLI and Unity Editor..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
-          sudo apt update
-          sudo apt install -y unityhub
+          # Install Unity CLI
+          curl -fsSL https://unity.com/install.sh | bash
           
-          # Install Unity via Unity Hub CLI
-          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          # Add Unity CLI to PATH
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Install Unity Editor with required modules
+          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
             echo "Unity installation verified"
             /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Unity binary not found"
-            exit 1
+            # Try alternative path
+            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+              echo "Unity installation verified (alternative path)"
+              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
+              # Create symlink for consistency
+              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
+            else
+              echo "Unity binary not found"
+              exit 1
+            fi
           fi
 
       - name: Activate Unity License
@@ -189,26 +205,34 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Install Unity using official Unity Hub apt repository
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity using official Unity CLI (recommended for CI)
+          echo "Installing Unity CLI and Unity Editor..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
-          sudo apt update
-          sudo apt install -y unityhub
+          # Install Unity CLI
+          curl -fsSL https://unity.com/install.sh | bash
           
-          # Install Unity via Unity Hub CLI
-          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          # Add Unity CLI to PATH
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Install Unity Editor with required modules
+          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
             echo "Unity installation verified"
             /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Unity binary not found"
-            exit 1
+            # Try alternative path
+            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+              echo "Unity installation verified (alternative path)"
+              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
+              # Create symlink for consistency
+              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
+            else
+              echo "Unity binary not found"
+              exit 1
+            fi
           fi
 
       - name: Activate Unity License
@@ -265,26 +289,34 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Install Unity using official Unity Hub apt repository
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity using official Unity CLI (recommended for CI)
+          echo "Installing Unity CLI and Unity Editor..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
-          sudo apt update
-          sudo apt install -y unityhub
+          # Install Unity CLI
+          curl -fsSL https://unity.com/install.sh | bash
           
-          # Install Unity via Unity Hub CLI
-          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          # Add Unity CLI to PATH
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Install Unity Editor with required modules
+          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
             echo "Unity installation verified"
             /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Unity binary not found"
-            exit 1
+            # Try alternative path
+            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+              echo "Unity installation verified (alternative path)"
+              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
+              # Create symlink for consistency
+              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
+            else
+              echo "Unity binary not found"
+              exit 1
+            fi
           fi
 
       - name: Activate Unity License
@@ -341,26 +373,34 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Install Unity using official Unity Hub apt repository
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity using official Unity CLI (recommended for CI)
+          echo "Installing Unity CLI and Unity Editor..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
-          sudo apt update
-          sudo apt install -y unityhub
+          # Install Unity CLI
+          curl -fsSL https://unity.com/install.sh | bash
           
-          # Install Unity via Unity Hub CLI
-          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          # Add Unity CLI to PATH
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Install Unity Editor with required modules
+          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
             echo "Unity installation verified"
             /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Unity binary not found"
-            exit 1
+            # Try alternative path
+            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+              echo "Unity installation verified (alternative path)"
+              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
+              # Create symlink for consistency
+              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
+            else
+              echo "Unity binary not found"
+              exit 1
+            fi
           fi
 
       - name: Activate Unity License
@@ -494,26 +534,34 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Install Unity using official Unity Hub apt repository
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity using official Unity CLI (recommended for CI)
+          echo "Installing Unity CLI and Unity Editor..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          echo "deb [signed-by=/etc/apt/keyrings/unityhub.gpg] https://hub.unity3d.com/linux/repos/deb stable main" | sudo tee /etc/apt/sources.list.d/unityhub.list
-          sudo apt update
-          sudo apt install -y unityhub
+          # Install Unity CLI
+          curl -fsSL https://unity.com/install.sh | bash
           
-          # Install Unity via Unity Hub CLI
-          unityhub --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -20
+          # Add Unity CLI to PATH
+          export PATH="$HOME/.local/bin:$PATH"
+          
+          # Install Unity Editor with required modules
+          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
             echo "Unity installation verified"
             /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
           else
-            echo "Unity binary not found"
-            exit 1
+            # Try alternative path
+            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
+              echo "Unity installation verified (alternative path)"
+              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
+              # Create symlink for consistency
+              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
+            else
+              echo "Unity binary not found"
+              exit 1
+            fi
           fi
 
       - name: Activate Unity License
