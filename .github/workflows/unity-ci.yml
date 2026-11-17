@@ -48,8 +48,8 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules
-          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          # Install Unity Editor with required modules (positional version argument)
+          unity install 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
@@ -130,8 +130,8 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules
-          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          # Install Unity Editor with required modules (positional version argument)
+          unity install 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
@@ -214,8 +214,8 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules
-          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          # Install Unity Editor with required modules (positional version argument)
+          unity install 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
@@ -298,8 +298,8 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules
-          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          # Install Unity Editor with required modules (positional version argument)
+          unity install 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
@@ -382,8 +382,8 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules
-          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          # Install Unity Editor with required modules (positional version argument)
+          unity install 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
@@ -543,8 +543,8 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules
-          unity install --version 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          # Install Unity Editor with required modules (positional version argument)
+          unity install 2022.3.21f1 --components linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
