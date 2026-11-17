@@ -115,8 +115,8 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Download Unity tar.xz directly (most reliable for Linux)
-          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
+          # Download Unity tar.xz - correct URL format for Unity 2022.3.x
+          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/Unity.tar.xz"
           echo "Downloading Unity from: $UNITY_URL"
           
           if curl -fsSL "$UNITY_URL" -o unity-editor.tar.xz; then
@@ -233,8 +233,8 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Download Unity tar.xz directly (most reliable for Linux)
-          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
+          # Download Unity tar.xz - correct URL format for Unity 2022.3.x
+          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/Unity.tar.xz"
           echo "Downloading Unity from: $UNITY_URL"
           
           if curl -fsSL "$UNITY_URL" -o unity-editor.tar.xz; then
@@ -301,8 +301,8 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Download Unity tar.xz directly (most reliable for Linux)
-          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
+          # Download Unity tar.xz - correct URL format for Unity 2022.3.x
+          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/Unity.tar.xz"
           echo "Downloading Unity from: $UNITY_URL"
           
           if curl -fsSL "$UNITY_URL" -o unity-editor.tar.xz; then
@@ -446,8 +446,8 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Download Unity tar.xz directly (most reliable for Linux)
-          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
+          # Download Unity tar.xz - correct URL format for Unity 2022.3.x
+          UNITY_URL="https://download.unity3d.com/download_unity/2022.3.21f1/Unity.tar.xz"
           echo "Downloading Unity from: $UNITY_URL"
           
           if curl -fsSL "$UNITY_URL" -o unity-editor.tar.xz; then
