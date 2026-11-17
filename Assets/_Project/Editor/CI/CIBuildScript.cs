@@ -20,6 +20,15 @@ namespace TomCatRunner.Editor.CI
         private const string COMPANY_NAME = "TomCatRunner Studio";
         private const string VERSION_FILE = "Assets/_Project/Resources/VersionInfo.asset";
 
+        /// <summary>
+        /// 设置 Android 构建为 APK 格式（供命令行调用）
+        /// </summary>
+        public static void SetAndroidBuildAPK()
+        {
+            EditorUserBuildSettings.buildAppBundle = false; // false = APK, true = AAB
+            Debug.Log("[CIBuildScript] Android build set to APK format");
+        }
+
         [MenuItem("TomCatRunner/CI/Build Windows Standalone")]
         public static void PerformWindowsBuild()
         {

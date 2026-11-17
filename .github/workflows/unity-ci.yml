@@ -191,10 +191,10 @@ jobs:
           retention-days: 30
 
   # ============================================
-  # ANDROID BUILD
+  # ANDROID BUILD (APK)
   # ============================================
   build-android:
-    name: Build Android (AAB)
+    name: Build Android (APK)
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: [editmode-tests, playmode-tests]
@@ -227,7 +227,7 @@ jobs:
           ndk-version: r26c
           cmdline-tools-version: latest
 
-      - name: Build Android AAB
+      - name: Build Android APK
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
@@ -235,56 +235,14 @@ jobs:
           unityVersion: ${{ env.UNITY_VERSION }}
           projectPath: ${{ env.PROJECT_PATH }}
           targetPlatform: Android
-          buildPath: ${{ env.BUILD_PATH }}/Android/TomCatRunner.aab
-          customParameters: -batchmode -nographics -logFile -
+          buildPath: ${{ env.BUILD_PATH }}/Android/TomCatRunner.apk
+          customParameters: -batchmode -nographics -logFile -executeMethod TomCatRunner.Editor.CI.CIBuildScript.SetAndroidBuildAPK
 
-      - name: Upload Android AAB
+      - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
           name: TomCatRunner-Android
-          path: ${{ env.BUILD_PATH }}/Android/TomCatRunner.aab
-          retention-days: 30
-
-  # ============================================
-  # iOS BUILD (requires macOS runner)
-  # ============================================
-  build-ios:
-    name: Build iOS (Xcode Project)
-    runs-on: macos-latest
-    timeout-minutes: 60
-    needs: [editmode-tests, playmode-tests]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          lfs: true
-          fetch-depth: 0
-
-      - name: Cache Library
-        uses: actions/cache@v4
-        with:
-          path: Library
-          key: Library-${{ runner.os }}-${{ hashFiles('Packages/manifest.json', 'Packages/packages-lock.json') }}
-          restore-keys: |
-            Library-${{ runner.os }}-
-
-      - name: Build iOS
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-        with:
-          unityVersion: ${{ env.UNITY_VERSION }}
-          projectPath: ${{ env.PROJECT_PATH }}
-          targetPlatform: iOS
-          buildPath: ${{ env.BUILD_PATH }}/iOS
-          customParameters: -batchmode -nographics -logFile -
-
-      - name: Upload iOS Xcode Project
-        uses: actions/upload-artifact@v4
-        with:
-          name: TomCatRunner-iOS
-          path: ${{ env.BUILD_PATH }}/iOS
+          path: ${{ env.BUILD_PATH }}/Android/TomCatRunner.apk
           retention-days: 30
 
   # ============================================
@@ -294,7 +252,7 @@ jobs:
     name: Create GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [build-windows, build-webgl, build-android, build-ios]
+    needs: [build-windows, build-webgl, build-android]
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
@@ -317,12 +275,6 @@ jobs:
           name: TomCatRunner-Android
           path: artifacts/Android
 
-      - name: Download iOS Build
-        uses: actions/download-artifact@v4
-        with:
-          name: TomCatRunner-iOS
-          path: artifacts/iOS
-
       - name: Generate Changelog
         id: changelog
         run: |
@@ -341,8 +293,7 @@ jobs:
             ### 📦 下载链接
             - **Windows 64位**: [TomCatRunner_Windows.zip](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/TomCatRunner_Windows.zip)
             - **WebGL (浏览器游玩)**: [TomCatRunner_WebGL.zip](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/TomCatRunner_WebGL.zip)
-            - **Android (AAB)**: [TomCatRunner.aab](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/TomCatRunner.aab)
-            - **iOS (Xcode Project)**: [TomCatRunner_iOS.zip](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/TomCatRunner_iOS.zip)
+            - **Android (APK)**: [TomCatRunner.apk](${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/TomCatRunner.apk)
             
             ### 📝 更新日志
             ${{ steps.changelog.outputs.changelog }}
@@ -362,8 +313,7 @@ jobs:
           files: |
             artifacts/Windows/TomCatRunner_Windows.zip
             artifacts/WebGL/TomCatRunner_WebGL.zip
-            artifacts/Android/TomCatRunner.aab
-            artifacts/iOS/**
+            artifacts/Android/TomCatRunner.apk
 
   # ============================================
   # PERFORMANCE BENCHMARK
