@@ -40,10 +40,36 @@ jobs:
       - name: Install Unity
         run: |
           # Download and install Unity Editor
-          UNITY_URL="https://download.unity3d.com/download_unity/linux-unity-editor-installer-${UNITY_VERSION}.sh"
-          curl -fsSL "$UNITY_URL" -o unity-installer.sh
+          # Try multiple URL formats for Unity 2022.3.21f1
+          UNITY_VERSION_CLEAN="2022.3.21f1"
+          UNITY_URL_1="https://download.unity3d.com/download_unity/2022.3.21f1/linux-unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_2="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_3="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux.sh"
+          
+          for url in "$UNITY_URL_1" "$UNITY_URL_2" "$UNITY_URL_3"; do
+            echo "Trying: $url"
+            if curl -fsSL "$url" -o unity-installer.sh; then
+              echo "Downloaded from: $url"
+              break
+            fi
+          done
+          
+          if [ ! -f unity-installer.sh ] || [ ! -s unity-installer.sh ]; then
+            echo "All URLs failed, trying tar.xz format..."
+            UNITY_URL_TAR="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
+            if curl -fsSL "$UNITY_URL_TAR" -o unity-editor.tar.xz; then
+              echo "Downloaded tar.xz from: $UNITY_URL_TAR"
+              mkdir -p /opt/unity/Editor/2022.3.21f1
+              tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
+              echo "Unity extracted successfully"
+              exit 0
+            fi
+            echo "All download attempts failed"
+            exit 1
+          fi
+          
           chmod +x unity-installer.sh
-          ./unity-installer.sh --install-location=/opt/unity/Editor/${UNITY_VERSION} --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
+          ./unity-installer.sh --install-location=/opt/unity/Editor/2022.3.21f1 --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
 
       - name: Activate Unity License
         run: |
@@ -89,10 +115,36 @@ jobs:
 
       - name: Install Unity
         run: |
-          UNITY_URL="https://download.unity3d.com/download_unity/linux-unity-editor-installer-${UNITY_VERSION}.sh"
-          curl -fsSL "$UNITY_URL" -o unity-installer.sh
+          # Try multiple URL formats for Unity 2022.3.21f1
+          UNITY_VERSION_CLEAN="2022.3.21f1"
+          UNITY_URL_1="https://download.unity3d.com/download_unity/2022.3.21f1/linux-unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_2="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_3="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux.sh"
+          
+          for url in "$UNITY_URL_1" "$UNITY_URL_2" "$UNITY_URL_3"; do
+            echo "Trying: $url"
+            if curl -fsSL "$url" -o unity-installer.sh; then
+              echo "Downloaded from: $url"
+              break
+            fi
+          done
+          
+          if [ ! -f unity-installer.sh ] || [ ! -s unity-installer.sh ]; then
+            echo "All URLs failed, trying tar.xz format..."
+            UNITY_URL_TAR="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
+            if curl -fsSL "$UNITY_URL_TAR" -o unity-editor.tar.xz; then
+              echo "Downloaded tar.xz from: $UNITY_URL_TAR"
+              mkdir -p /opt/unity/Editor/2022.3.21f1
+              tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
+              echo "Unity extracted successfully"
+              exit 0
+            fi
+            echo "All download attempts failed"
+            exit 1
+          fi
+          
           chmod +x unity-installer.sh
-          ./unity-installer.sh --install-location=/opt/unity/Editor/${UNITY_VERSION} --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
+          ./unity-installer.sh --install-location=/opt/unity/Editor/2022.3.21f1 --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
 
       - name: Activate Unity License
         run: |
@@ -190,10 +242,36 @@ jobs:
 
       - name: Install Unity
         run: |
-          UNITY_URL="https://download.unity3d.com/download_unity/linux-unity-editor-installer-${UNITY_VERSION}.sh"
-          curl -fsSL "$UNITY_URL" -o unity-installer.sh
+          # Try multiple URL formats for Unity 2022.3.21f1
+          UNITY_VERSION_CLEAN="2022.3.21f1"
+          UNITY_URL_1="https://download.unity3d.com/download_unity/2022.3.21f1/linux-unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_2="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_3="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux.sh"
+          
+          for url in "$UNITY_URL_1" "$UNITY_URL_2" "$UNITY_URL_3"; do
+            echo "Trying: $url"
+            if curl -fsSL "$url" -o unity-installer.sh; then
+              echo "Downloaded from: $url"
+              break
+            fi
+          done
+          
+          if [ ! -f unity-installer.sh ] || [ ! -s unity-installer.sh ]; then
+            echo "All URLs failed, trying tar.xz format..."
+            UNITY_URL_TAR="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
+            if curl -fsSL "$UNITY_URL_TAR" -o unity-editor.tar.xz; then
+              echo "Downloaded tar.xz from: $UNITY_URL_TAR"
+              mkdir -p /opt/unity/Editor/2022.3.21f1
+              tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
+              echo "Unity extracted successfully"
+              exit 0
+            fi
+            echo "All download attempts failed"
+            exit 1
+          fi
+          
           chmod +x unity-installer.sh
-          ./unity-installer.sh --install-location=/opt/unity/Editor/${UNITY_VERSION} --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
+          ./unity-installer.sh --install-location=/opt/unity/Editor/2022.3.21f1 --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
 
       - name: Activate Unity License
         run: |
@@ -241,10 +319,36 @@ jobs:
 
       - name: Install Unity
         run: |
-          UNITY_URL="https://download.unity3d.com/download_unity/linux-unity-editor-installer-${UNITY_VERSION}.sh"
-          curl -fsSL "$UNITY_URL" -o unity-installer.sh
+          # Try multiple URL formats for Unity 2022.3.21f1
+          UNITY_VERSION_CLEAN="2022.3.21f1"
+          UNITY_URL_1="https://download.unity3d.com/download_unity/2022.3.21f1/linux-unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_2="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_3="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux.sh"
+          
+          for url in "$UNITY_URL_1" "$UNITY_URL_2" "$UNITY_URL_3"; do
+            echo "Trying: $url"
+            if curl -fsSL "$url" -o unity-installer.sh; then
+              echo "Downloaded from: $url"
+              break
+            fi
+          done
+          
+          if [ ! -f unity-installer.sh ] || [ ! -s unity-installer.sh ]; then
+            echo "All URLs failed, trying tar.xz format..."
+            UNITY_URL_TAR="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
+            if curl -fsSL "$UNITY_URL_TAR" -o unity-editor.tar.xz; then
+              echo "Downloaded tar.xz from: $UNITY_URL_TAR"
+              mkdir -p /opt/unity/Editor/2022.3.21f1
+              tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
+              echo "Unity extracted successfully"
+              exit 0
+            fi
+            echo "All download attempts failed"
+            exit 1
+          fi
+          
           chmod +x unity-installer.sh
-          ./unity-installer.sh --install-location=/opt/unity/Editor/${UNITY_VERSION} --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
+          ./unity-installer.sh --install-location=/opt/unity/Editor/2022.3.21f1 --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
 
       - name: Activate Unity License
         run: |
@@ -369,10 +473,36 @@ jobs:
 
       - name: Install Unity
         run: |
-          UNITY_URL="https://download.unity3d.com/download_unity/linux-unity-editor-installer-${UNITY_VERSION}.sh"
-          curl -fsSL "$UNITY_URL" -o unity-installer.sh
+          # Try multiple URL formats for Unity 2022.3.21f1
+          UNITY_VERSION_CLEAN="2022.3.21f1"
+          UNITY_URL_1="https://download.unity3d.com/download_unity/2022.3.21f1/linux-unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_2="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-installer-2022.3.21f1.sh"
+          UNITY_URL_3="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux.sh"
+          
+          for url in "$UNITY_URL_1" "$UNITY_URL_2" "$UNITY_URL_3"; do
+            echo "Trying: $url"
+            if curl -fsSL "$url" -o unity-installer.sh; then
+              echo "Downloaded from: $url"
+              break
+            fi
+          done
+          
+          if [ ! -f unity-installer.sh ] || [ ! -s unity-installer.sh ]; then
+            echo "All URLs failed, trying tar.xz format..."
+            UNITY_URL_TAR="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
+            if curl -fsSL "$UNITY_URL_TAR" -o unity-editor.tar.xz; then
+              echo "Downloaded tar.xz from: $UNITY_URL_TAR"
+              mkdir -p /opt/unity/Editor/2022.3.21f1
+              tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
+              echo "Unity extracted successfully"
+              exit 0
+            fi
+            echo "All download attempts failed"
+            exit 1
+          fi
+          
           chmod +x unity-installer.sh
-          ./unity-installer.sh --install-location=/opt/unity/Editor/${UNITY_VERSION} --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
+          ./unity-installer.sh --install-location=/opt/unity/Editor/2022.3.21f1 --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
 
       - name: Activate Unity License
         run: |
