@@ -115,26 +115,24 @@ jobs:
 
       - name: Install Unity
         run: |
-          # Install Unity via official Unity Hub apt repository (most reliable)
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity Hub via AppImage (most reliable)
+          echo "Installing Unity Hub via AppImage..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          sudo tee /etc/apt/sources.list.d/unityhub.sources > /dev/null << EOF
-Types: deb
-URIs: https://hub.unity3d.com/linux/repos/deb
-Suites: stable
-Components: main
-Signed-By: /etc/apt/keyrings/unityhub.gpg
-EOF
+          # Download Unity Hub AppImage
+          UNITY_HUB_URL="https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.AppImage"
+          echo "Downloading Unity Hub from: $UNITY_HUB_URL"
+          curl -fsSL "$UNITY_HUB_URL" -o /tmp/UnityHub.AppImage
+          chmod +x /tmp/UnityHub.AppImage
           
-          # Update and install Unity Hub
-          sudo apt update
-          sudo apt install -y unityhub
+          # Extract Unity Hub (AppImage needs to be extracted for headless use)
+          cd /tmp
+          ./UnityHub.AppImage --appimage-extract 2>&1 | tail -5
+          sudo mv squashfs-root /opt/unityhub
+          sudo ln -sf /opt/unityhub/AppRun /usr/local/bin/unityhub
           
           # Use Unity Hub to install specific Unity version
-          /opt/unityhub/unityhub -- --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          echo "Installing Unity 2022.3.21f1 via Unity Hub..."
+          /opt/unityhub/AppRun --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
@@ -241,26 +239,24 @@ EOF
 
       - name: Install Unity
         run: |
-          # Install Unity via official Unity Hub apt repository (most reliable)
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity Hub via AppImage (most reliable)
+          echo "Installing Unity Hub via AppImage..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          sudo tee /etc/apt/sources.list.d/unityhub.sources > /dev/null << EOF
-Types: deb
-URIs: https://hub.unity3d.com/linux/repos/deb
-Suites: stable
-Components: main
-Signed-By: /etc/apt/keyrings/unityhub.gpg
-EOF
+          # Download Unity Hub AppImage
+          UNITY_HUB_URL="https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.AppImage"
+          echo "Downloading Unity Hub from: $UNITY_HUB_URL"
+          curl -fsSL "$UNITY_HUB_URL" -o /tmp/UnityHub.AppImage
+          chmod +x /tmp/UnityHub.AppImage
           
-          # Update and install Unity Hub
-          sudo apt update
-          sudo apt install -y unityhub
+          # Extract Unity Hub (AppImage needs to be extracted for headless use)
+          cd /tmp
+          ./UnityHub.AppImage --appimage-extract 2>&1 | tail -5
+          sudo mv squashfs-root /opt/unityhub
+          sudo ln -sf /opt/unityhub/AppRun /usr/local/bin/unityhub
           
           # Use Unity Hub to install specific Unity version
-          /opt/unityhub/unityhub -- --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          echo "Installing Unity 2022.3.21f1 via Unity Hub..."
+          /opt/unityhub/AppRun --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
@@ -317,26 +313,24 @@ EOF
 
       - name: Install Unity
         run: |
-          # Install Unity via official Unity Hub apt repository (most reliable)
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity Hub via AppImage (most reliable)
+          echo "Installing Unity Hub via AppImage..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          sudo tee /etc/apt/sources.list.d/unityhub.sources > /dev/null << EOF
-Types: deb
-URIs: https://hub.unity3d.com/linux/repos/deb
-Suites: stable
-Components: main
-Signed-By: /etc/apt/keyrings/unityhub.gpg
-EOF
+          # Download Unity Hub AppImage
+          UNITY_HUB_URL="https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.AppImage"
+          echo "Downloading Unity Hub from: $UNITY_HUB_URL"
+          curl -fsSL "$UNITY_HUB_URL" -o /tmp/UnityHub.AppImage
+          chmod +x /tmp/UnityHub.AppImage
           
-          # Update and install Unity Hub
-          sudo apt update
-          sudo apt install -y unityhub
+          # Extract Unity Hub (AppImage needs to be extracted for headless use)
+          cd /tmp
+          ./UnityHub.AppImage --appimage-extract 2>&1 | tail -5
+          sudo mv squashfs-root /opt/unityhub
+          sudo ln -sf /opt/unityhub/AppRun /usr/local/bin/unityhub
           
           # Use Unity Hub to install specific Unity version
-          /opt/unityhub/unityhub -- --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          echo "Installing Unity 2022.3.21f1 via Unity Hub..."
+          /opt/unityhub/AppRun --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
@@ -470,26 +464,24 @@ EOF
 
       - name: Install Unity
         run: |
-          # Install Unity via official Unity Hub apt repository (most reliable)
-          echo "Installing Unity Hub and Unity Editor via apt..."
+          # Install Unity Hub via AppImage (most reliable)
+          echo "Installing Unity Hub via AppImage..."
           
-          # Add Unity Hub repository
-          sudo install -d /etc/apt/keyrings
-          curl -fsSL https://hub.unity3d.com/linux/keys/public | sudo gpg --dearmor -o /etc/apt/keyrings/unityhub.gpg
-          sudo tee /etc/apt/sources.list.d/unityhub.sources > /dev/null << EOF
-Types: deb
-URIs: https://hub.unity3d.com/linux/repos/deb
-Suites: stable
-Components: main
-Signed-By: /etc/apt/keyrings/unityhub.gpg
-EOF
+          # Download Unity Hub AppImage
+          UNITY_HUB_URL="https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.AppImage"
+          echo "Downloading Unity Hub from: $UNITY_HUB_URL"
+          curl -fsSL "$UNITY_HUB_URL" -o /tmp/UnityHub.AppImage
+          chmod +x /tmp/UnityHub.AppImage
           
-          # Update and install Unity Hub
-          sudo apt update
-          sudo apt install -y unityhub
+          # Extract Unity Hub (AppImage needs to be extracted for headless use)
+          cd /tmp
+          ./UnityHub.AppImage --appimage-extract 2>&1 | tail -5
+          sudo mv squashfs-root /opt/unityhub
+          sudo ln -sf /opt/unityhub/AppRun /usr/local/bin/unityhub
           
           # Use Unity Hub to install specific Unity version
-          /opt/unityhub/unityhub -- --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
+          echo "Installing Unity 2022.3.21f1 via Unity Hub..."
+          /opt/unityhub/AppRun --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
           
           # Verify installation
           if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
