@@ -48,25 +48,54 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules (using --module flag, repeated)
+          # Install Unity Editor with required modules
           unity install 2022.3.21f1 --module linux-il2cpp --module linux-webgl --module android 2>&1 | tail -30
           
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            # Try alternative path
-            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified (alternative path)"
-              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
-              # Create symlink for consistency
-              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
-              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
-            else
-              echo "Unity binary not found"
-              exit 1
+          # Find Unity installation path
+          echo "Finding Unity installation..."
+          UNITY_PATH=""
+          
+          # Check common installation paths
+          for path in \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/usr/local/unity/Editor/2022.3.21f1/Editor/Unity"; do
+            if [ -f "$path" ]; then
+              UNITY_PATH="$path"
+              echo "Unity found at: $UNITY_PATH"
+              break
             fi
+          done
+          
+          # If not found, try to find it with unity editors command
+          if [ -z "$UNITY_PATH" ]; then
+            echo "Searching for Unity installation via 'unity editors' command..."
+            unity editors 2>&1 | while IFS= read -r line; do
+              if echo "$line" | grep -q "2022.3.21f1"; then
+                # Extract path from line like: 2022.3.21f1  /path/to/unity
+                path=$(echo "$line" | awk '{print $2}')
+                if [ -f "$path/Editor/Unity" ]; then
+                  UNITY_PATH="$path/Editor/Unity"
+                  echo "Unity found via 'unity editors': $UNITY_PATH"
+                  break
+                fi
+              fi
+            done
+          fi
+          
+          if [ -n "$UNITY_PATH" ]; then
+            echo "Unity installation verified at: $UNITY_PATH"
+            "$UNITY_PATH" -version
+            # Create symlink for consistency
+            sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+            sudo ln -sf "$(dirname "$UNITY_PATH")" /opt/unity/Editor/2022.3.21f1
+          else
+            echo "Unity binary not found in any known location"
+            echo "Trying to list all unity editors..."
+            unity editors
+            exit 1
           fi
 
       - name: Activate Unity License
@@ -130,25 +159,54 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules (using --module flag, repeated)
+          # Install Unity Editor with required modules
           unity install 2022.3.21f1 --module linux-il2cpp --module linux-webgl --module android 2>&1 | tail -30
           
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            # Try alternative path
-            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified (alternative path)"
-              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
-              # Create symlink for consistency
-              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
-              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
-            else
-              echo "Unity binary not found"
-              exit 1
+          # Find Unity installation path
+          echo "Finding Unity installation..."
+          UNITY_PATH=""
+          
+          # Check common installation paths
+          for path in \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/usr/local/unity/Editor/2022.3.21f1/Editor/Unity"; do
+            if [ -f "$path" ]; then
+              UNITY_PATH="$path"
+              echo "Unity found at: $UNITY_PATH"
+              break
             fi
+          done
+          
+          # If not found, try to find it with unity editors command
+          if [ -z "$UNITY_PATH" ]; then
+            echo "Searching for Unity installation via 'unity editors' command..."
+            unity editors 2>&1 | while IFS= read -r line; do
+              if echo "$line" | grep -q "2022.3.21f1"; then
+                # Extract path from line like: 2022.3.21f1  /path/to/unity
+                path=$(echo "$line" | awk '{print $2}')
+                if [ -f "$path/Editor/Unity" ]; then
+                  UNITY_PATH="$path/Editor/Unity"
+                  echo "Unity found via 'unity editors': $UNITY_PATH"
+                  break
+                fi
+              fi
+            done
+          fi
+          
+          if [ -n "$UNITY_PATH" ]; then
+            echo "Unity installation verified at: $UNITY_PATH"
+            "$UNITY_PATH" -version
+            # Create symlink for consistency
+            sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+            sudo ln -sf "$(dirname "$UNITY_PATH")" /opt/unity/Editor/2022.3.21f1
+          else
+            echo "Unity binary not found in any known location"
+            echo "Trying to list all unity editors..."
+            unity editors
+            exit 1
           fi
 
       - name: Activate Unity License
@@ -214,25 +272,54 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules (using --module flag, repeated)
+          # Install Unity Editor with required modules
           unity install 2022.3.21f1 --module linux-il2cpp --module linux-webgl --module android 2>&1 | tail -30
           
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            # Try alternative path
-            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified (alternative path)"
-              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
-              # Create symlink for consistency
-              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
-              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
-            else
-              echo "Unity binary not found"
-              exit 1
+          # Find Unity installation path
+          echo "Finding Unity installation..."
+          UNITY_PATH=""
+          
+          # Check common installation paths
+          for path in \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/usr/local/unity/Editor/2022.3.21f1/Editor/Unity"; do
+            if [ -f "$path" ]; then
+              UNITY_PATH="$path"
+              echo "Unity found at: $UNITY_PATH"
+              break
             fi
+          done
+          
+          # If not found, try to find it with unity editors command
+          if [ -z "$UNITY_PATH" ]; then
+            echo "Searching for Unity installation via 'unity editors' command..."
+            unity editors 2>&1 | while IFS= read -r line; do
+              if echo "$line" | grep -q "2022.3.21f1"; then
+                # Extract path from line like: 2022.3.21f1  /path/to/unity
+                path=$(echo "$line" | awk '{print $2}')
+                if [ -f "$path/Editor/Unity" ]; then
+                  UNITY_PATH="$path/Editor/Unity"
+                  echo "Unity found via 'unity editors': $UNITY_PATH"
+                  break
+                fi
+              fi
+            done
+          fi
+          
+          if [ -n "$UNITY_PATH" ]; then
+            echo "Unity installation verified at: $UNITY_PATH"
+            "$UNITY_PATH" -version
+            # Create symlink for consistency
+            sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+            sudo ln -sf "$(dirname "$UNITY_PATH")" /opt/unity/Editor/2022.3.21f1
+          else
+            echo "Unity binary not found in any known location"
+            echo "Trying to list all unity editors..."
+            unity editors
+            exit 1
           fi
 
       - name: Activate Unity License
@@ -298,25 +385,54 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules (using --module flag, repeated)
+          # Install Unity Editor with required modules
           unity install 2022.3.21f1 --module linux-il2cpp --module linux-webgl --module android 2>&1 | tail -30
           
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            # Try alternative path
-            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified (alternative path)"
-              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
-              # Create symlink for consistency
-              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
-              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
-            else
-              echo "Unity binary not found"
-              exit 1
+          # Find Unity installation path
+          echo "Finding Unity installation..."
+          UNITY_PATH=""
+          
+          # Check common installation paths
+          for path in \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/usr/local/unity/Editor/2022.3.21f1/Editor/Unity"; do
+            if [ -f "$path" ]; then
+              UNITY_PATH="$path"
+              echo "Unity found at: $UNITY_PATH"
+              break
             fi
+          done
+          
+          # If not found, try to find it with unity editors command
+          if [ -z "$UNITY_PATH" ]; then
+            echo "Searching for Unity installation via 'unity editors' command..."
+            unity editors 2>&1 | while IFS= read -r line; do
+              if echo "$line" | grep -q "2022.3.21f1"; then
+                # Extract path from line like: 2022.3.21f1  /path/to/unity
+                path=$(echo "$line" | awk '{print $2}')
+                if [ -f "$path/Editor/Unity" ]; then
+                  UNITY_PATH="$path/Editor/Unity"
+                  echo "Unity found via 'unity editors': $UNITY_PATH"
+                  break
+                fi
+              fi
+            done
+          fi
+          
+          if [ -n "$UNITY_PATH" ]; then
+            echo "Unity installation verified at: $UNITY_PATH"
+            "$UNITY_PATH" -version
+            # Create symlink for consistency
+            sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+            sudo ln -sf "$(dirname "$UNITY_PATH")" /opt/unity/Editor/2022.3.21f1
+          else
+            echo "Unity binary not found in any known location"
+            echo "Trying to list all unity editors..."
+            unity editors
+            exit 1
           fi
 
       - name: Activate Unity License
@@ -382,25 +498,54 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules (using --module flag, repeated)
+          # Install Unity Editor with required modules
           unity install 2022.3.21f1 --module linux-il2cpp --module linux-webgl --module android 2>&1 | tail -30
           
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            # Try alternative path
-            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified (alternative path)"
-              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
-              # Create symlink for consistency
-              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
-              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
-            else
-              echo "Unity binary not found"
-              exit 1
+          # Find Unity installation path
+          echo "Finding Unity installation..."
+          UNITY_PATH=""
+          
+          # Check common installation paths
+          for path in \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/usr/local/unity/Editor/2022.3.21f1/Editor/Unity"; do
+            if [ -f "$path" ]; then
+              UNITY_PATH="$path"
+              echo "Unity found at: $UNITY_PATH"
+              break
             fi
+          done
+          
+          # If not found, try to find it with unity editors command
+          if [ -z "$UNITY_PATH" ]; then
+            echo "Searching for Unity installation via 'unity editors' command..."
+            unity editors 2>&1 | while IFS= read -r line; do
+              if echo "$line" | grep -q "2022.3.21f1"; then
+                # Extract path from line like: 2022.3.21f1  /path/to/unity
+                path=$(echo "$line" | awk '{print $2}')
+                if [ -f "$path/Editor/Unity" ]; then
+                  UNITY_PATH="$path/Editor/Unity"
+                  echo "Unity found via 'unity editors': $UNITY_PATH"
+                  break
+                fi
+              fi
+            done
+          fi
+          
+          if [ -n "$UNITY_PATH" ]; then
+            echo "Unity installation verified at: $UNITY_PATH"
+            "$UNITY_PATH" -version
+            # Create symlink for consistency
+            sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+            sudo ln -sf "$(dirname "$UNITY_PATH")" /opt/unity/Editor/2022.3.21f1
+          else
+            echo "Unity binary not found in any known location"
+            echo "Trying to list all unity editors..."
+            unity editors
+            exit 1
           fi
 
       - name: Activate Unity License
@@ -543,25 +688,54 @@ jobs:
           # Add Unity CLI to PATH
           export PATH="$HOME/.local/bin:$PATH"
           
-          # Install Unity Editor with required modules (using --module flag, repeated)
+          # Install Unity Editor with required modules
           unity install 2022.3.21f1 --module linux-il2cpp --module linux-webgl --module android 2>&1 | tail -30
           
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            # Try alternative path
-            if [ -f "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-              echo "Unity installation verified (alternative path)"
-              $HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity -version
-              # Create symlink for consistency
-              sudo mkdir -p /opt/unity/Editor/2022.3.21f1
-              sudo ln -sf $HOME/.local/share/unity/Editor/2022.3.21f1 /opt/unity/Editor/2022.3.21f1
-            else
-              echo "Unity binary not found"
-              exit 1
+          # Find Unity installation path
+          echo "Finding Unity installation..."
+          UNITY_PATH=""
+          
+          # Check common installation paths
+          for path in \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/.local/share/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "$HOME/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/opt/unity/Editor/2022.3.21f1/Editor/Unity" \
+            "/usr/local/unity/Editor/2022.3.21f1/Editor/Unity"; do
+            if [ -f "$path" ]; then
+              UNITY_PATH="$path"
+              echo "Unity found at: $UNITY_PATH"
+              break
             fi
+          done
+          
+          # If not found, try to find it with unity editors command
+          if [ -z "$UNITY_PATH" ]; then
+            echo "Searching for Unity installation via 'unity editors' command..."
+            unity editors 2>&1 | while IFS= read -r line; do
+              if echo "$line" | grep -q "2022.3.21f1"; then
+                # Extract path from line like: 2022.3.21f1  /path/to/unity
+                path=$(echo "$line" | awk '{print $2}')
+                if [ -f "$path/Editor/Unity" ]; then
+                  UNITY_PATH="$path/Editor/Unity"
+                  echo "Unity found via 'unity editors': $UNITY_PATH"
+                  break
+                fi
+              fi
+            done
+          fi
+          
+          if [ -n "$UNITY_PATH" ]; then
+            echo "Unity installation verified at: $UNITY_PATH"
+            "$UNITY_PATH" -version
+            # Create symlink for consistency
+            sudo mkdir -p /opt/unity/Editor/2022.3.21f1
+            sudo ln -sf "$(dirname "$UNITY_PATH")" /opt/unity/Editor/2022.3.21f1
+          else
+            echo "Unity binary not found in any known location"
+            echo "Trying to list all unity editors..."
+            unity editors
+            exit 1
           fi
 
       - name: Activate Unity License
