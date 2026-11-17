@@ -38,50 +38,32 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        run: |
-          # Download and install Unity Editor
-          # Try multiple URL formats for Unity 2022.3.21f1
-          UNITY_VERSION_CLEAN="2022.3.21f1"
-          UNITY_URL_1="https://download.unity3d.com/download_unity/2022.3.21f1/linux-unity-editor-installer-2022.3.21f1.sh"
-          UNITY_URL_2="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-installer-2022.3.21f1.sh"
-          UNITY_URL_3="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux.sh"
-          
-          for url in "$UNITY_URL_1" "$UNITY_URL_2" "$UNITY_URL_3"; do
-            echo "Trying: $url"
-            if curl -fsSL "$url" -o unity-installer.sh; then
-              echo "Downloaded from: $url"
-              break
-            fi
-          done
-          
-          if [ ! -f unity-installer.sh ] || [ ! -s unity-installer.sh ]; then
-            echo "All URLs failed, trying tar.xz format..."
-            UNITY_URL_TAR="https://download.unity3d.com/download_unity/2022.3.21f1/unity-editor-2022.3.21f1-linux-x64.tar.xz"
-            if curl -fsSL "$UNITY_URL_TAR" -o unity-editor.tar.xz; then
-              echo "Downloaded tar.xz from: $UNITY_URL_TAR"
-              mkdir -p /opt/unity/Editor/2022.3.21f1
-              tar -xf unity-editor.tar.xz -C /opt/unity/Editor/2022.3.21f1 --strip-components=1
-              echo "Unity extracted successfully"
-              exit 0
-            fi
-            echo "All download attempts failed"
-            exit 1
-          fi
-          
-          chmod +x unity-installer.sh
-          ./unity-installer.sh --install-location=/opt/unity/Editor/2022.3.21f1 --components=unity-editor,unity-android,unity-webgl --unattended 2>&1 | tail -20
+        uses: game-ci/unity-installer@v2
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
+        uses: game-ci/unity-activate@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Restore Packages
         run: |
           /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run EditMode Tests
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -runTests -testPlatform editmode -testResults artifacts/editmode/test-results.xml -logFile - 2>&1 | tail -20
+        uses: game-ci/unity-test-runner@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: editmode
+          artifactsPath: artifacts/editmode
+          customParameters: -batchmode -nographics -logFile -
 
       - name: Upload EditMode Test Results
         uses: actions/upload-artifact@v4
@@ -114,46 +96,32 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        run: |
-          # Install Unity Hub via AppImage (most reliable)
-          echo "Installing Unity Hub via AppImage..."
-          
-          # Download Unity Hub AppImage
-          UNITY_HUB_URL="https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.AppImage"
-          echo "Downloading Unity Hub from: $UNITY_HUB_URL"
-          curl -fsSL "$UNITY_HUB_URL" -o /tmp/UnityHub.AppImage
-          chmod +x /tmp/UnityHub.AppImage
-          
-          # Extract Unity Hub (AppImage needs to be extracted for headless use)
-          cd /tmp
-          ./UnityHub.AppImage --appimage-extract 2>&1 | tail -5
-          sudo mv squashfs-root /opt/unityhub
-          sudo ln -sf /opt/unityhub/AppRun /usr/local/bin/unityhub
-          
-          # Use Unity Hub to install specific Unity version
-          echo "Installing Unity 2022.3.21f1 via Unity Hub..."
-          /opt/unityhub/AppRun --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
-          
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            echo "Unity binary not found after installation"
-            exit 1
-          fi
+        uses: game-ci/unity-installer@v2
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
+        uses: game-ci/unity-activate@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Restore Packages
         run: |
           /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run PlayMode Tests
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -runTests -testPlatform playmode -testResults artifacts/playmode/test-results.xml -logFile - 2>&1 | tail -20
+        uses: game-ci/unity-test-runner@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: playmode
+          artifactsPath: artifacts/playmode
+          customParameters: -batchmode -nographics -logFile -
 
       - name: Upload PlayMode Test Results
         uses: actions/upload-artifact@v4
@@ -188,18 +156,26 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        run: |
-          $unityUrl = "https://download.unity3d.com/download_unity/win64_unity-editor-installer-${env:UNITY_VERSION}.exe"
-          Invoke-WebRequest -Uri $unityUrl -OutFile "unity_installer.exe"
-          Start-Process -FilePath "unity_installer.exe" -ArgumentList "/S /D=C:\Unity\Editor\${env:UNITY_VERSION} /Components=Unity-Editor,Unity-Android,Unity-WebGL" -Wait
+        uses: game-ci/unity-installer@v2
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
         run: |
           & "C:\Unity\Editor\${env:UNITY_VERSION}\Editor\Unity.exe" -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit
 
       - name: Build Windows Standalone
-        run: |
-          & "C:\Unity\Editor\${env:UNITY_VERSION}\Editor\Unity.exe" -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -buildWindows64Player "${{ env.BUILD_PATH }}\Windows\TomCatRunner.exe" -logFile - -quit
+        uses: game-ci/unity-builder@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: StandaloneWindows64
+          buildPath: ${{ env.BUILD_PATH }}/Windows/TomCatRunner.exe
+          customParameters: -batchmode -nographics -logFile -
 
       - name: Compress Build
         run: |
@@ -238,42 +214,28 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        run: |
-          # Install Unity Hub via AppImage (most reliable)
-          echo "Installing Unity Hub via AppImage..."
-          
-          # Download Unity Hub AppImage
-          UNITY_HUB_URL="https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.AppImage"
-          echo "Downloading Unity Hub from: $UNITY_HUB_URL"
-          curl -fsSL "$UNITY_HUB_URL" -o /tmp/UnityHub.AppImage
-          chmod +x /tmp/UnityHub.AppImage
-          
-          # Extract Unity Hub (AppImage needs to be extracted for headless use)
-          cd /tmp
-          ./UnityHub.AppImage --appimage-extract 2>&1 | tail -5
-          sudo mv squashfs-root /opt/unityhub
-          sudo ln -sf /opt/unityhub/AppRun /usr/local/bin/unityhub
-          
-          # Use Unity Hub to install specific Unity version
-          echo "Installing Unity 2022.3.21f1 via Unity Hub..."
-          /opt/unityhub/AppRun --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
-          
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            echo "Unity binary not found after installation"
-            exit 1
-          fi
+        uses: game-ci/unity-installer@v2
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
+        uses: game-ci/unity-activate@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Build WebGL
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -buildWebGLPlayer "${{ env.BUILD_PATH }}/WebGL" -logFile - -quit 2>&1 | tail -20
+        uses: game-ci/unity-builder@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: WebGL
+          buildPath: ${{ env.BUILD_PATH }}/WebGL
+          customParameters: -batchmode -nographics -logFile -
 
       - name: Compress WebGL Build
         run: |
@@ -312,38 +274,16 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        run: |
-          # Install Unity Hub via AppImage (most reliable)
-          echo "Installing Unity Hub via AppImage..."
-          
-          # Download Unity Hub AppImage
-          UNITY_HUB_URL="https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.AppImage"
-          echo "Downloading Unity Hub from: $UNITY_HUB_URL"
-          curl -fsSL "$UNITY_HUB_URL" -o /tmp/UnityHub.AppImage
-          chmod +x /tmp/UnityHub.AppImage
-          
-          # Extract Unity Hub (AppImage needs to be extracted for headless use)
-          cd /tmp
-          ./UnityHub.AppImage --appimage-extract 2>&1 | tail -5
-          sudo mv squashfs-root /opt/unityhub
-          sudo ln -sf /opt/unityhub/AppRun /usr/local/bin/unityhub
-          
-          # Use Unity Hub to install specific Unity version
-          echo "Installing Unity 2022.3.21f1 via Unity Hub..."
-          /opt/unityhub/AppRun --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
-          
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            echo "Unity binary not found after installation"
-            exit 1
-          fi
+        uses: game-ci/unity-installer@v2
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
+        uses: game-ci/unity-activate@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -359,8 +299,16 @@ jobs:
           cmdline-tools-version: latest
 
       - name: Build Android APK
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -buildTarget Android -executeMethod TomCatRunner.Editor.CI.CIBuildScript.SetAndroidBuildAPK -buildLinux64Player "${{ env.BUILD_PATH }}/Android/TomCatRunner.apk" -logFile - -quit 2>&1 | tail -20
+        uses: game-ci/unity-builder@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          targetPlatform: Android
+          buildPath: ${{ env.BUILD_PATH }}/Android/TomCatRunner.apk
+          customParameters: -batchmode -nographics -logFile -executeMethod TomCatRunner.Editor.CI.CIBuildScript.SetAndroidBuildAPK
 
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
@@ -463,46 +411,33 @@ jobs:
             Library-${{ runner.os }}-
 
       - name: Install Unity
-        run: |
-          # Install Unity Hub via AppImage (most reliable)
-          echo "Installing Unity Hub via AppImage..."
-          
-          # Download Unity Hub AppImage
-          UNITY_HUB_URL="https://public-cdn.cloud.unity3d.com/hub/prod/UnityHubSetup.AppImage"
-          echo "Downloading Unity Hub from: $UNITY_HUB_URL"
-          curl -fsSL "$UNITY_HUB_URL" -o /tmp/UnityHub.AppImage
-          chmod +x /tmp/UnityHub.AppImage
-          
-          # Extract Unity Hub (AppImage needs to be extracted for headless use)
-          cd /tmp
-          ./UnityHub.AppImage --appimage-extract 2>&1 | tail -5
-          sudo mv squashfs-root /opt/unityhub
-          sudo ln -sf /opt/unityhub/AppRun /usr/local/bin/unityhub
-          
-          # Use Unity Hub to install specific Unity version
-          echo "Installing Unity 2022.3.21f1 via Unity Hub..."
-          /opt/unityhub/AppRun --headless install --version 2022.3.21f1 --childModules linux-il2cpp,linux-webgl,android 2>&1 | tail -30
-          
-          # Verify installation
-          if [ -f "/opt/unity/Editor/2022.3.21f1/Editor/Unity" ]; then
-            echo "Unity installation verified"
-            /opt/unity/Editor/2022.3.21f1/Editor/Unity -version
-          else
-            echo "Unity binary not found after installation"
-            exit 1
-          fi
+        uses: game-ci/unity-installer@v2
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          cacheKey: unity-${{ env.UNITY_VERSION }}-${{ runner.os }}
 
       - name: Activate Unity License
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -logFile - -username "${UNITY_USERNAME}" -password "${UNITY_PASSWORD}" -quit 2>&1 | tail -20
+        uses: game-ci/unity-activate@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
 
       - name: Restore Packages
         run: |
           /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -quit -logFile - 2>&1 | tail -20
 
       - name: Run Performance Tests
-        run: |
-          /opt/unity/Editor/${UNITY_VERSION}/Editor/Unity -batchmode -nographics -projectPath ${{ env.PROJECT_PATH }} -runTests -testPlatform playmode -testResults artifacts/performance/test-results.xml -logFile - 2>&1 | tail -20
+        uses: game-ci/unity-test-runner@v2
+        env:
+          UNITY_USERNAME: ${{ secrets.UNITY_USERNAME }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion: ${{ env.UNITY_VERSION }}
+          projectPath: ${{ env.PROJECT_PATH }}
+          testMode: playmode
+          categoryFilter: Performance
+          artifactsPath: artifacts/performance
+          customParameters: -batchmode -nographics -logFile -
 
       - name: Upload Performance Results
         uses: actions/upload-artifact@v4
