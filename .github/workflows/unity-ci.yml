@@ -182,7 +182,7 @@ jobs:
           targetPlatform: StandaloneWindows64
           buildName: TomCatRunner
           buildsPath: builds/Win64
-          buildMethod: TomCatRunner.Editor.CIBuildScript.BuildWindows64
+          buildMethod: TomCatRunner.Editor.CI.CIBuildScript.BuildWindows64
           unityVersion: 2022.3.62f3
           allowDirtyBuild: true
 
@@ -197,7 +197,7 @@ jobs:
           targetPlatform: WebGL
           buildName: TomCatRunner
           buildsPath: builds/WebGL
-          buildMethod: TomCatRunner.Editor.CIBuildScript.BuildWebGL
+          buildMethod: TomCatRunner.Editor.CI.CIBuildScript.BuildWebGL
           unityVersion: 2022.3.62f3
           allowDirtyBuild: true
 
