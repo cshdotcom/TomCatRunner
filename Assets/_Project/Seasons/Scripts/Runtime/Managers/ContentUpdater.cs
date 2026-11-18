@@ -296,12 +296,17 @@ namespace TomCatRunner.Seasons
 
             try
             {
+#if !UNITY_WEBGL
                 var cacheSize = Caching.currentCacheForWriting.spaceOccupied;
                 if (cacheSize > _maxCacheSizeBytes)
                 {
                     Caching.ClearCache();
                     if (_debugLog) Debug.Log($"[ContentUpdater] Cache cleaned: {FormatBytes(cacheSize)}");
                 }
+#else
+                if (_debugLog) Debug.Log("[ContentUpdater] Caching API not available on WebGL, skipping");
+                await UniTask.Yield();
+#endif
             }
             catch (Exception e)
             {
