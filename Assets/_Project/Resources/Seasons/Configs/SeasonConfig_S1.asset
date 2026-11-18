@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae97de54-264a-4c74-633a-871abcae7836, type: 3}
+  m_Name: SeasonConfig_S1
+  m_EditorClassIdentifier:
+  _seasonId: S1_2026_SAKURA
+  _displayName: "S1 \u00B7 \u6A31\u82B1\u732B\u5B63"
+  _sortOrder: 1
+  _startTime: 639290880000000000
+  _endTime: 639343583990000000
+  _useServerTime: 0
+  _themeProfile: {fileID: 11400000, guid: 3ede172b-4946-2673-1cf9-6ce642355adf, type: 2}

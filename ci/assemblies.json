@@ -396,6 +396,28 @@
       "unsafe": false
     },
     {
+      "name": "TomCatRunner.Gameplay.Runtime",
+      "sources": [
+        "Assets/_Project/Gameplay/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Game",
+        "UniRx",
+        "UniTask",
+        "VContainer",
+        "UnityEngine.UI",
+        "DOTween.Modules",
+        "Assets/Plugins/DOTween/DOTween.dll"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
       "name": "TomCatRunner.Seasons.Editor",
       "sources": [
         "Assets/_Project/Seasons/Scripts/Editor/**/*.cs"

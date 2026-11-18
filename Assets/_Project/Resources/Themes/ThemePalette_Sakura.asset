@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9212fde3-cce4-4f87-e655-9347d40d6d06, type: 3}
+  m_Name: ThemePalette_Sakura
+  m_EditorClassIdentifier:
+  _primary: {r: 0.957, g: 0.427, b: 0.6, a: 1}
+  _primaryVariant: {r: 0.82, g: 0.31, b: 0.48, a: 1}
+  _secondary: {r: 0.98, g: 0.72, b: 0.29, a: 1}
+  _secondaryVariant: {r: 0.79, g: 0.54, b: 0.16, a: 1}
+  _tertiary: {r: 0.42, g: 0.73, b: 0.55, a: 1}
+  _surface: {r: 0.98, g: 0.96, b: 0.97, a: 1}
+  _surfaceVariant: {r: 0.93, g: 0.88, b: 0.9, a: 1}
+  _background: {r: 0.97, g: 0.93, b: 0.94, a: 1}
+  _backgroundVariant: {r: 0.94, g: 0.9, b: 0.92, a: 1}
+  _error: {r: 0.85, g: 0.18, b: 0.18, a: 1}
+  _errorContainer: {r: 1, g: 0.85, b: 0.85, a: 1}
+  _onPrimary: {r: 1, g: 1, b: 1, a: 1}
+  _onSecondary: {r: 1, g: 1, b: 1, a: 1}
+  _onTertiary: {r: 1, g: 1, b: 1, a: 1}
+  _onSurface: {r: 0.12, g: 0.1, b: 0.12, a: 1}
+  _onSurfaceVariant: {r: 0.34, g: 0.3, b: 0.34, a: 1}
+  _onBackground: {r: 0.12, g: 0.1, b: 0.12, a: 1}
+  _onError: {r: 1, g: 1, b: 1, a: 1}
+  _outline: {r: 0.1, g: 0.1, b: 0.12, a: 0.12}
+  _shadow: {r: 0, g: 0, b: 0, a: 0.2}
+  _shadowStrong: {r: 0, g: 0, b: 0, a: 0.4}
+  _hoverOverlay: {r: 0, g: 0, b: 0, a: 0.08}
+  _pressedOverlay: {r: 0, g: 0, b: 0, a: 0.12}
+  _focusOverlay: {r: 0.12, g: 0.58, b: 0.95, a: 0.2}
+  _disabledOverlay: {r: 0.1, g: 0.1, b: 0.12, a: 0.38}

@@ -42,10 +42,10 @@ namespace TomCatRunner.Common.DI
                 OfflineMode = _offlineMode
             }).AsSelf();
 
-            // ========== 语法配置（运行时兜底创建） ==========
+            // ========== 语法配置（运行时兜底创建：无资产依赖的完整默认文法） ==========
             var grammarConfig = _grammarConfigOverride != null
                 ? _grammarConfigOverride
-                : ScriptableObject.CreateInstance<GrammarConfig>();
+                : GrammarConfig.CreateDefault();
             builder.RegisterInstance(grammarConfig).AsSelf();
 
             // ========== 响应式基础设施 ==========

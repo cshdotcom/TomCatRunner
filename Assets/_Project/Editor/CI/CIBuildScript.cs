@@ -217,12 +217,10 @@ namespace TomCatRunner.Editor.CI
 
             if (scenes.Length == 0)
             {
-                // 默认场景
+                // 默认场景：单一入口场景（全部内容由 GameplayBootstrap 程序化构建）
                 scenes = new[]
                 {
-                    "Assets/_Project/Scenes/Boot.unity",
-                    "Assets/_Project/Scenes/SeasonHub.unity",
-                    "Assets/_Project/Scenes/Gameplay.unity"
+                    "Assets/_Project/Scenes/Main.unity"
                 };
             }
 

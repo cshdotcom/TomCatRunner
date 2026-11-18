@@ -238,56 +238,12 @@ namespace TomCatRunner.Core.Level
 
         private GameObject CreateDefaultChunkPrefab(ChunkType type)
         {
+            // 默认 Chunk 占位根：内容全部由 ChunkContentBuilder 程序化生成，
+            // 这里不创建任何网格/材质（避免渲染管线差异与内置资源名称兼容问题）
             var go = new GameObject($"Chunk_{type}_Default");
-            var renderer = go.AddComponent<MeshRenderer>();
-            var filter = go.AddComponent<MeshFilter>();
-
-            // 根据类型创建不同形状的白模
-            PrimitiveType primitive = type switch
-            {
-                ChunkType.Jump => PrimitiveType.Cube,
-                ChunkType.Slide => PrimitiveType.Cube,
-                ChunkType.Attack => PrimitiveType.Cylinder,
-                ChunkType.Coin => PrimitiveType.Sphere,
-                ChunkType.Mixed => PrimitiveType.Cube,
-                ChunkType.Hazard => PrimitiveType.Cube,
-                ChunkType.Boss => PrimitiveType.Cube,
-                ChunkType.Transition => PrimitiveType.Cube,
-                ChunkType.Secret => PrimitiveType.Sphere,
-                ChunkType.Powerup => PrimitiveType.Capsule,
-                _ => PrimitiveType.Cube
-            };
-
-            filter.mesh = Resources.GetBuiltinResource<Mesh>($"{primitive}.mesh");
-
-            // 设置颜色标识
-            var mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            mat.color = GetTypeColor(type);
-            renderer.material = mat;
-
-            // 添加 ChunkMetadata
             var metadata = go.AddComponent<ChunkMetadata>();
             metadata.Type = type;
-
             return go;
-        }
-
-        private Color GetTypeColor(ChunkType type)
-        {
-            return type switch
-            {
-                ChunkType.Jump => new Color(0.2f, 0.8f, 1f),      // 青色
-                ChunkType.Slide => new Color(1f, 0.6f, 0.2f),     // 橙色
-                ChunkType.Attack => new Color(1f, 0.2f, 0.4f),    // 红色
-                ChunkType.Coin => new Color(1f, 0.9f, 0.1f),      // 金色
-                ChunkType.Mixed => new Color(0.6f, 0.3f, 0.9f),   // 紫色
-                ChunkType.Hazard => new Color(0.8f, 0.1f, 0.1f),  // 深红
-                ChunkType.Boss => new Color(0.5f, 0f, 0.8f),      // 深紫
-                ChunkType.Transition => new Color(0.5f, 0.5f, 0.5f), // 灰色
-                ChunkType.Secret => new Color(0f, 1f, 0.5f),      // 绿色
-                ChunkType.Powerup => new Color(1f, 0.4f, 0.8f),   // 粉色
-                _ => Color.white
-            };
         }
 
         private ChunkInstance CreateNewInstance(ChunkData data)

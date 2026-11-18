@@ -137,35 +137,42 @@ Assets/_Project/
 ### 环境要求
 | 工具 | 版本 | 说明 |
 |------|------|------|
-| Unity | 2022.3.15f1+ | LTS 版本，通过 Unity Hub 安装 |
-| Git | 2.40+ | LFS 支持 |
-| .NET SDK | 6.0+ | IL2CPP 构建需要 |
-| Node.js | 18+ | 可选，用于本地 CDN |
+| Unity | 2022.3.62f3 | LTS 版本，通过 Unity Hub 安装 |
+| Git | 2.40+ | — |
+| .NET SDK | 8.0+ | 仅本地 CI 编译验证需要（可选） |
 
 ### 克隆与打开
 ```bash
-# 克隆仓库（含 LFS 大文件）
-git lfs install
-git clone https://github.com/your-org/tom-cat-runner.git
-cd tom-cat-runner
+git clone https://github.com/cshdotcom/TomCatRunner.git
+cd TomCatRunner
 
-# 用 Unity Hub 打开项目，选择 2022.3.15f1
+# 用 Unity Hub 打开项目根目录，选择 Unity 2022.3.62f3 (LTS)
 ```
 
-### 首次运行
-1. **打开 Boot 场景** → `Assets/_Project/Scenes/Boot.unity`
-2. **进入 Play Mode** → 自动初始化所有系统
-3. **观察 Console**：
-   ```
-   [SeasonManager] Initialized. Current Season: Spring_2024
-   [LevelStreamer] Ready. Pool size: 50
-   [ContentUpdater] Checking updates... (Offline Mode)
-   [BattlePassSystem] Loaded. Level: 1, XP: 0
-   [EventScheduler] 2 active events
-   [UIManager] All views registered
-   ```
+### 🎮 开箱即玩
+1. **打开主场景** → `Assets/_Project/Scenes/Main.unity`
+2. **直接点 Play** — 无需任何配置：
+   - 全部游戏内容（猫、跑道、障碍、金币、UI、音效）由 `GameplayBootstrap` **运行时程序化生成**，无外部资源依赖
+   - 首次运行自动按日期选择主题（春樱 / 夏海 / 秋枫 / 冬雪）
+   - 菜单 → 开始奔跑 → 3-2-1 出发 → 跑酷 → 撞击结算，完整闭环
 
-### 构建发布包
+**操作**：← → / A D 切道 · ↑ / W / 空格 跳跃 · ↓ / S 滑铲 · ESC / P 暂停（触屏：滑动 + 点按）
+
+**玩法系统**：
+- 三车道跑酷 + 跳跃/滑铲 + 渐进难度（8.5 → 17 m/s）
+- 10 类 Chunk 内容：低栏(跳)、高梁(滑)、地刺(闪)、高箱(换道)、移动箱、金币阵/弧线/环形、宝石房
+- 三种道具：磁铁（金币吸附）/ 护盾（抵挡一次）/ 冲刺（加速撞碎障碍）
+- 连击 Combo（4 秒窗口，每 5 连击金币加成 +50%）
+- 得分/距离/金币统计，最高分与累计金币持久化（PlayerPrefs）
+- 死亡慢动作 + 震屏 + 速度 FOV，全部音效与背景音乐由代码合成（无音频文件）
+
+### 本地零依赖编译验证（可选）
+```bash
+python3 ci/fetch_refs.py   # 下载 Unity 引用程序集（约 1.2GB，自动缓存）
+python3 ci/compile.py      # Roslyn 全量编译 28 个程序集，零错误门槛
+```
+
+### 构建发布包（需要 Unity 许可证）
 ```bash
 # Windows 独立版
 # 菜单栏: TomCatRunner > CI > Build Windows Standalone

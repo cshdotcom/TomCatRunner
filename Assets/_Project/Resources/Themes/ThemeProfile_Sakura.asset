@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d23f553f-76d2-5764-f28c-278c100d22d8, type: 3}
+  m_Name: ThemeProfile_Sakura
+  m_EditorClassIdentifier:
+  _themeId: sakura_s1
+  _displayName: "\u6A31\u82B1\u732B\u5B63"
+  _season: 0
+  _colorPalette: {fileID: 11400000, guid: 52019791-ccc4-6fd8-a7af-7033f22d4d6c, type: 2}
+  _shaderParams:
+    CornerRadius: 0.15
+    EdgeFeather: 0.02
+    NoiseSpeed: 1.2
+    NoiseScale: 1.8
+    NoiseIntensity: 0.6
+    NoiseOctaves: 4
+    ChromaticStrength: 0.012
+    ChromaticSpeed: 0.8
+    ScanlineSpeed: 2.5
+    ScanlineWidth: 0.15
+    ScanlineIntensity: 0.7
+    ScanlineColor: {r: 0.2, g: 1, b: 0.8, a: 1}
+    GlowWidth: 0.3
+    GlowPulseSpeed: 1.5
+    GlowIntensity: 0.8
+  _assets:
+    CharacterSkin: {fileID: 0}
+    EnvironmentDecoration: {fileID: 0}
+    ChunkDecorations: []
+    SkyboxMaterial: {fileID: 0}
+    LoadingBackground: {fileID: 0}
+    SeasonLogo: {fileID: 0}
+    SeasonBanner: {fileID: 0}

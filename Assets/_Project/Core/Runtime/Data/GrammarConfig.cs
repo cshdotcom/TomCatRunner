@@ -91,6 +91,69 @@ namespace TomCatRunner.Core.Data
             return results.ToArray();
         }
 
+        /// <summary>
+        /// 创建运行时默认配置（无资产依赖，字段齐全）
+        /// 供 GameLifetimeScope 兜底与 CI 测试使用
+        /// </summary>
+        public static GrammarConfig CreateDefault()
+        {
+            var cfg = CreateInstance<GrammarConfig>();
+            cfg._grammarId = "TCR-DEFAULT";
+            cfg._displayName = "默认跑道文法";
+
+            cfg._rules = new[]
+            {
+                new GrammarRule { NonTerminal = "Level", Productions = new[] { "Segment Level", "Segment" } },
+                new GrammarRule { NonTerminal = "Segment", Productions = new[] { "JumpChunk", "SlideChunk", "AttackChunk", "CoinChunk", "MixedChunk", "HazardChunk" } },
+                new GrammarRule { NonTerminal = "JumpChunk", Productions = new[] { "LowJump", "HighJump", "DoubleJump", "TripleJump" } },
+                new GrammarRule { NonTerminal = "SlideChunk", Productions = new[] { "ShortSlide", "LongSlide", "SlideJump" } },
+                new GrammarRule { NonTerminal = "AttackChunk", Productions = new[] { "SingleTarget", "MultiTarget", "BossAttack" } },
+                new GrammarRule { NonTerminal = "CoinChunk", Productions = new[] { "CoinLine", "CoinArc", "CoinCluster", "CoinSpiral" } },
+                new GrammarRule { NonTerminal = "MixedChunk", Productions = new[] { "JumpSlide", "JumpAttack", "SlideAttack", "JumpSlideAttack" } },
+                new GrammarRule { NonTerminal = "HazardChunk", Productions = new[] { "Spikes", "Pit", "MovingObstacle", "TimedHazard" } },
+            };
+
+            // 马尔可夫转移（归一化，自然转移加权）
+            var transitions = new List<MarkovTransition>();
+            var types = (ChunkType[])Enum.GetValues(typeof(ChunkType));
+            var totals = new Dictionary<ChunkType, float>();
+            foreach (ChunkType from in types)
+            {
+                foreach (ChunkType to in types)
+                {
+                    float weight = from == to ? 0.06f : 0.55f;
+                    if ((from == ChunkType.Jump && to == ChunkType.Slide) ||
+                        (from == ChunkType.Slide && to == ChunkType.Coin) ||
+                        (from == ChunkType.Coin && to == ChunkType.Mixed) ||
+                        (from == ChunkType.Mixed && to == ChunkType.Hazard) ||
+                        (from == ChunkType.Hazard && to == ChunkType.Transition))
+                        weight = 1.6f;
+                    if (to == ChunkType.Boss) weight = 0.06f;   // Boss 稀有
+                    transitions.Add(new MarkovTransition { From = from, To = to, Weight = weight });
+                    totals[from] = totals.GetValueOrDefault(from) + weight;
+                }
+            }
+            foreach (var t in transitions) t.Weight /= totals[t.From];
+            cfg._transitions = transitions.ToArray();
+
+            cfg._chunkDefinitions = new[]
+            {
+                new ChunkDefinition { Type = ChunkType.Jump, PrefabRef = null, AddressableKey = "", MinLength = 3, MaxLength = 5 },
+                new ChunkDefinition { Type = ChunkType.Slide, PrefabRef = null, AddressableKey = "", MinLength = 3, MaxLength = 5 },
+                new ChunkDefinition { Type = ChunkType.Attack, PrefabRef = null, AddressableKey = "", MinLength = 4, MaxLength = 6 },
+                new ChunkDefinition { Type = ChunkType.Coin, PrefabRef = null, AddressableKey = "", MinLength = 2, MaxLength = 4 },
+                new ChunkDefinition { Type = ChunkType.Mixed, PrefabRef = null, AddressableKey = "", MinLength = 4, MaxLength = 8 },
+                new ChunkDefinition { Type = ChunkType.Hazard, PrefabRef = null, AddressableKey = "", MinLength = 3, MaxLength = 5 },
+                new ChunkDefinition { Type = ChunkType.Boss, PrefabRef = null, AddressableKey = "", MinLength = 10, MaxLength = 12 },
+                new ChunkDefinition { Type = ChunkType.Transition, PrefabRef = null, AddressableKey = "", MinLength = 2, MaxLength = 3 },
+                new ChunkDefinition { Type = ChunkType.Secret, PrefabRef = null, AddressableKey = "", MinLength = 3, MaxLength = 6 },
+                new ChunkDefinition { Type = ChunkType.Powerup, PrefabRef = null, AddressableKey = "", MinLength = 1, MaxLength = 2 },
+            };
+
+            cfg._requiredChunks = Array.Empty<ChunkType>();
+            return cfg;
+        }
+
         public bool Validate(out string error)
         {
             if (string.IsNullOrEmpty(_grammarId))
