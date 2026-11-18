@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae97de54-264a-4c74-633a-871abcae7836, type: 3}
+  m_Script: {fileID: 11500000, guid: ae97de54264a4c74633a871abcae7836, type: 3}
   m_Name: SeasonConfig_S1
   m_EditorClassIdentifier:
   _seasonId: S1_2026_SAKURA
@@ -18,4 +18,4 @@ MonoBehaviour:
   _startTime: 639290880000000000
   _endTime: 639343583990000000
   _useServerTime: 0
-  _themeProfile: {fileID: 11400000, guid: 3ede172b-4946-2673-1cf9-6ce642355adf, type: 2}
+  _themeProfile: {fileID: 11400000, guid: 3ede172b494626731cf96ce642355adf, type: 2}

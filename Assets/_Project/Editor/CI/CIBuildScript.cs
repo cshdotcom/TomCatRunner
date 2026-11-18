@@ -36,11 +36,53 @@ namespace TomCatRunner.Editor.CI
             BuildWindowsStandalone();
         }
 
+        /// <summary>
+        /// CI 入口：Windows x86_64 Standalone 构建（供 game-ci/unity-builder 调用）
+        /// </summary>
+        public static void BuildWindows64()
+        {
+            ConfigurePlayerSettings();
+            BuildWindowsStandalone();
+        }
+
         [MenuItem("TomCatRunner/CI/Build WebGL")]
         public static void PerformWebGLBuild()
         {
             ConfigurePlayerSettings();
             BuildWebGL();
+        }
+
+        /// <summary>
+        /// CI 入口：WebGL 构建（供 game-ci/unity-builder 调用）
+        /// </summary>
+        public static void BuildWebGL()
+        {
+            ConfigurePlayerSettings();
+            BuildWebGLInternal();
+        }
+
+        private static void BuildWebGLInternal()
+        {
+            string buildPath = "Builds/WebGL";
+
+            Directory.CreateDirectory(buildPath);
+
+            var scenes = GetBuildScenes();
+            var options = new BuildPlayerOptions
+            {
+                scenes = scenes,
+                locationPathName = buildPath,
+                target = BuildTarget.WebGL,
+                options = BuildOptions.StrictMode
+            };
+
+            Debug.Log($"[CIBuildScript] Building WebGL to: {buildPath}");
+
+            var report = BuildPipeline.BuildPlayer(options);
+            HandleBuildReport(report, "WebGL");
+
+            // 生成版本信息文件
+            GenerateVersionInfo(buildPath, "WebGL");
         }
 
         [MenuItem("TomCatRunner/CI/Build Addressables")]
@@ -101,7 +143,15 @@ namespace TomCatRunner.Editor.CI
             // 渲染管线资产（内置管线；若未来引入 URP，在这里加载资产）
             var rpAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.RenderPipelineAsset>(
                 "Assets/_Project/Settings/URP/URPAsset.asset");
-            UnityEngine.Rendering.GraphicsSettings.renderPipelineAsset = rpAsset;
+            if (rpAsset != null)
+            {
+                UnityEngine.Rendering.GraphicsSettings.renderPipelineAsset = rpAsset;
+                Debug.Log("[CIBuildScript] URP asset loaded");
+            }
+            else
+            {
+                Debug.LogWarning("[CIBuildScript] URP asset not found, using built-in render pipeline");
+            }
 
             // Quality 设置
             QualitySettings.SetQualityLevel(2, true); // Medium quality for CI

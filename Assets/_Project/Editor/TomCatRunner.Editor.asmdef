@@ -1,0 +1,28 @@
+{
+    "name": "TomCatRunner.Editor",
+    "rootNamespace": "TomCatRunner.Editor",
+    "references": [
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "TomCatRunner.Seasons.Editor",
+        "TomCatRunner.Game",
+        "UniRx",
+        "UniTask",
+        "VContainer",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

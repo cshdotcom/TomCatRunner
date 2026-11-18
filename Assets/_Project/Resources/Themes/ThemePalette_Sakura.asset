@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9212fde3-cce4-4f87-e655-9347d40d6d06, type: 3}
+  m_Script: {fileID: 11500000, guid: 9212fde3cce44f87e6559347d40d6d06, type: 3}
   m_Name: ThemePalette_Sakura
   m_EditorClassIdentifier:
   _primary: {r: 0.957, g: 0.427, b: 0.6, a: 1}
