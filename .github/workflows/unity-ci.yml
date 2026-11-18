@@ -141,11 +141,10 @@ jobs:
   unity_build:
     name: Unity Player Build (Win64 + WebGL)
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     needs: validate
-    # 仅当仓库已配置 UNITY_LICENSE secret 且 tag 推送或手动触发时才跑
-    # 未配置时 job 自动跳过；release job 不依赖此 job，会继续走源码+DLL 兜底发布
-    if: ${{ (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')) && vars.UNITY_LICENSE_CONFIGURED == 'true' }}
+    # tag 推送或手动触发时运行；UNITY_LICENSE secret 已在仓库配置
+    if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v') }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
