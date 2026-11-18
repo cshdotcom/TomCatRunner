@@ -181,6 +181,7 @@ jobs:
           buildName: TomCatRunner
           buildsPath: builds/Win64
           buildMethod: TomCatRunner.Editor.CIBuildScript.BuildWindows64
+          unityVersion: 2022.3.62f3
           allowDirtyBuild: true
 
       - name: Build WebGL
@@ -193,6 +194,7 @@ jobs:
           buildName: TomCatRunner
           buildsPath: builds/WebGL
           buildMethod: TomCatRunner.Editor.CIBuildScript.BuildWebGL
+          unityVersion: 2022.3.62f3
           allowDirtyBuild: true
 
       - name: Pack Windows build
