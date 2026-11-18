@@ -67,7 +67,7 @@ namespace TomCatRunner.UI
 
         [Header("动画")]
         [SerializeField] private float _staggerDelay = 0.05f;
-        [SerializeField] private Ease _enterEase = Ease.OutBack;
+        [SerializeField] private Ease _hubEnterEase = Ease.OutBack;
 
         private SeasonHubViewModel _viewModel;
         private readonly List<GameObject> _eventPreviewItems = new List<GameObject>();
@@ -194,7 +194,7 @@ namespace TomCatRunner.UI
 
                 // 入场动画
                 item.transform.localScale = Vector3.zero;
-                item.transform.DOScale(1f, 0.3f).SetDelay(i * _staggerDelay).SetEase(_enterEase);
+                item.transform.DOScale(1f, 0.3f).SetDelay(i * _staggerDelay).SetEase(_hubEnterEase);
             }
         }
 
@@ -242,20 +242,20 @@ namespace TomCatRunner.UI
             // 标题滑入
             _seasonTitleText.transform.localPosition += Vector3.up * 100f;
             _seasonTitleText.alpha = 0;
-            _enterSequence.Join(_seasonTitleText.transform.DOLocalMoveY(_seasonTitleText.transform.localPosition.y - 100f, 0.6f).SetEase(_enterEase));
+            _enterSequence.Join(_seasonTitleText.transform.DOLocalMoveY(_seasonTitleText.transform.localPosition.y - 100f, 0.6f).SetEase(_hubEnterEase));
             _enterSequence.Join(_seasonTitleText.DOFade(1f, 0.4f));
 
             // 副标题
             _seasonSubtitleText.transform.localPosition += Vector3.up * 50f;
             _seasonSubtitleText.alpha = 0;
-            _enterSequence.Join(_seasonSubtitleText.transform.DOLocalMoveY(_seasonSubtitleText.transform.localPosition.y - 50f, 0.5f).SetDelay(0.1f).SetEase(_enterEase));
+            _enterSequence.Join(_seasonSubtitleText.transform.DOLocalMoveY(_seasonSubtitleText.transform.localPosition.y - 50f, 0.5f).SetDelay(0.1f).SetEase(_hubEnterEase));
             _enterSequence.Join(_seasonSubtitleText.DOFade(1f, 0.3f).SetDelay(0.1f));
 
             // 阶段信息
             var phaseGroup = _phaseNameText.transform.parent;
             phaseGroup.localPosition += Vector3.down * 50f;
             phaseGroup.GetComponent<CanvasGroup>().alpha = 0;
-            _enterSequence.Join(phaseGroup.DOLocalMoveY(phaseGroup.localPosition.y + 50f, 0.5f).SetDelay(0.2f).SetEase(_enterEase));
+            _enterSequence.Join(phaseGroup.DOLocalMoveY(phaseGroup.localPosition.y + 50f, 0.5f).SetDelay(0.2f).SetEase(_hubEnterEase));
             _enterSequence.Join(phaseGroup.GetComponent<CanvasGroup>().DOFade(1f, 0.3f).SetDelay(0.2f));
 
             // 功能按钮交错入场
@@ -272,7 +272,7 @@ namespace TomCatRunner.UI
             var bpGroup = _bpTierText.transform.parent;
             bpGroup.localPosition += Vector3.right * 100f;
             bpGroup.GetComponent<CanvasGroup>().alpha = 0;
-            _enterSequence.Join(bpGroup.DOLocalMoveX(bpGroup.localPosition.x - 100f, 0.5f).SetDelay(0.4f).SetEase(_enterEase));
+            _enterSequence.Join(bpGroup.DOLocalMoveX(bpGroup.localPosition.x - 100f, 0.5f).SetDelay(0.4f).SetEase(_hubEnterEase));
             _enterSequence.Join(bpGroup.GetComponent<CanvasGroup>().DOFade(1f, 0.3f).SetDelay(0.4f));
 
             await _enterSequence.AsyncWaitForCompletion();
