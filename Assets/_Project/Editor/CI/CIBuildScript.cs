@@ -178,7 +178,11 @@ namespace TomCatRunner.Editor.CI
             PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.Android, ManagedStrippingLevel.Low);
 
             // WebGL 特定设置
-            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli;
+            // 必须禁用压缩：GitHub Pages 不会发送 Content-Encoding: br / gzip 头，
+            // 浏览器拿到 .framework.js.br 等文件后无法解码 → 加载失败。
+            // 改用 Disabled 后 framework.js / wasm / data 直接以未压缩形态 serve，
+            // 文件会变大（约 30~40MB），但能跨平台稳定加载（桌面/手机浏览器均可）。
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
             PlayerSettings.WebGL.nameFilesAsHashes = true;
             PlayerSettings.WebGL.dataCaching = true;
             PlayerSettings.WebGL.threadsSupport = false; // 需要 SharedArrayBuffer 支持
