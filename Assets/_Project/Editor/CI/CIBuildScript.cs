@@ -61,6 +61,47 @@ namespace TomCatRunner.Editor.CI
             BuildWebGLInternal();
         }
 
+        /// <summary>
+        /// CI 入口：Android APK 构建（供 game-ci/unity-builder 调用）
+        /// </summary>
+        public static void BuildAndroid()
+        {
+            ConfigurePlayerSettings();
+            SetAndroidBuildAPK(); // 强制 APK 格式（非 AAB）
+            BuildAndroidInternal();
+        }
+
+        [MenuItem("TomCatRunner/CI/Build Android APK")]
+        public static void PerformAndroidBuild()
+        {
+            BuildAndroid();
+        }
+
+        private static void BuildAndroidInternal()
+        {
+            string buildPath = "Builds/Android";
+            string fullPath = Path.Combine(buildPath, $"{PRODUCT_NAME}.apk");
+
+            Directory.CreateDirectory(buildPath);
+
+            var scenes = GetBuildScenes();
+            var options = new BuildPlayerOptions
+            {
+                scenes = scenes,
+                locationPathName = fullPath,
+                target = BuildTarget.Android,
+                options = BuildOptions.StrictMode
+            };
+
+            Debug.Log($"[CIBuildScript] Building Android APK to: {fullPath}");
+
+            var report = BuildPipeline.BuildPlayer(options);
+            HandleBuildReport(report, "Android");
+
+            // 生成版本信息文件
+            GenerateVersionInfo(buildPath, "Android");
+        }
+
         private static void BuildWebGLInternal()
         {
             string buildPath = "Builds/WebGL";
@@ -121,11 +162,20 @@ namespace TomCatRunner.Editor.CI
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
             // WebGL 必须 IL2CPP，game-ci 对 WebGL 会自动用 webgl-il2cpp 镜像
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.WebGL, ScriptingImplementation.IL2CPP);
+            // Android 用 IL2CPP，game-ci 对 Android 会自动用 android 镜像（含 Android SDK/NDK + IL2CPP）
+            PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
+
+            // Android CPU 架构：ARMv7 + ARM64（Google Play 要求 ARM64）
+            PlayerSettings.Android.targetArchitectures = UnityEditor.AndroidArchitecture.ARMv7 | UnityEditor.AndroidArchitecture.ARM64;
+
+            // Android 最低 SDK 版本：API 22（IL2CPP 支持的最低版本，强转避免枚举名差异）
+            PlayerSettings.Android.minSdkVersion = (UnityEditor.AndroidSdkVersions)22;
 
             // 优化设置（Mono 后端不能用 High stripping）
             PlayerSettings.stripEngineCode = true;
             PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.Standalone, ManagedStrippingLevel.Minimal);
             PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.WebGL, ManagedStrippingLevel.Low);
+            PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.Android, ManagedStrippingLevel.Low);
 
             // WebGL 特定设置
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli;

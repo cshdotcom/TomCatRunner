@@ -139,9 +139,9 @@ jobs:
   # - 两种格式 game-ci/unity-builder 都能直接消费，无需 EMAIL/PASSWORD
   # ============================================================
   unity_build:
-    name: Unity Player Build (Win64 + WebGL)
+    name: Unity Player Build (Win64 + WebGL + Android)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     needs: validate
     # tag 推送或手动触发时运行；UNITY_LICENSE secret 已在仓库配置
     if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v') }}
@@ -201,6 +201,22 @@ jobs:
           unityVersion: 2022.3.62f3
           allowDirtyBuild: true
 
+      - name: Build Android APK
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: .
+          targetPlatform: Android
+          buildName: TomCatRunner
+          buildsPath: builds/Android
+          buildMethod: TomCatRunner.Editor.CI.CIBuildScript.BuildAndroid
+          unityVersion: 2022.3.62f3
+          androidExportType: androidPackage
+          allowDirtyBuild: true
+
       - name: Pack Windows build
         run: |
           # CIBuildScript.BuildWindowsStandalone 输出到 Builds/Windows/
@@ -215,6 +231,13 @@ jobs:
           cd Builds/WebGL && zip -q -r ../../TomCatRunner-WebGL.zip . && cd ../..
           ls -la TomCatRunner-WebGL.zip
 
+      - name: Pack Android build
+        run: |
+          # CIBuildScript.BuildAndroidInternal 输出到 Builds/Android/TomCatRunner.apk
+          ls -la Builds/Android/ 2>&1 | head -5
+          cp Builds/Android/TomCatRunner.apk TomCatRunner-Android.apk
+          ls -la TomCatRunner-Android.apk
+
       - name: Upload Windows build
         uses: actions/upload-artifact@v4
         with:
@@ -228,6 +251,14 @@ jobs:
         with:
           name: TomCatRunner-WebGL
           path: TomCatRunner-WebGL.zip
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload Android build
+        uses: actions/upload-artifact@v4
+        with:
+          name: TomCatRunner-Android
+          path: TomCatRunner-Android.apk
           if-no-files-found: warn
           retention-days: 30
 
@@ -303,6 +334,13 @@ jobs:
           path: dist
         continue-on-error: true
 
+      - name: Download Android build
+        uses: actions/download-artifact@v4
+        with:
+          name: TomCatRunner-Android
+          path: dist
+        continue-on-error: true
+
       - name: List release assets
         run: ls -la dist/
 
@@ -318,8 +356,23 @@ jobs:
 
           - `TomCatRunner-source.zip` — 完整源码
           - `TomCatRunner-compiled-dlls.zip` — CI 编译出的全部程序集 DLL（无 License 构建）
-          - `TomCatRunner-Win64.zip` — Windows x86_64 可执行程序（需配置 UNITY_LICENSE secret 才会生成）
-          - `TomCatRunner-WebGL.zip` — WebGL 浏览器版构建包（同上）
+          - `TomCatRunner-Win64.zip` — Windows x86_64 可执行程序
+          - `TomCatRunner-WebGL.zip` — WebGL 浏览器版构建包
+          - `TomCatRunner-Android.apk` — Android APK（ARMv7 + ARM64，IL2CPP）
+
+          ## 安卓 APK 说明
+
+          - 架构：ARMv7 + ARM64（覆盖 99% 现代 Android 设备）
+          - 脚本后端：IL2CPP（性能优于 Mono，包体更小）
+          - 最低系统：Android 5.1 (API 22)
+          - 签名：Debug 签名（可直接安装；上架 Google Play 需替换为正式 keystore）
+          - 安装方式：下载后传输到手机，允许「未知来源」安装即可
+
+          ## v2.3.0 关键变更
+
+          - 新增 Android APK 构建（game-ci android 镜像，含 Android SDK/NDK + IL2CPP）
+          - CIBuildScript 新增 BuildAndroid() 公开入口
+          - ConfigurePlayerSettings 加 Android IL2CPP 后端 + ARM64 架构 + API 22 最低版本
 
           ## v2.0.0 关键变更
 
@@ -373,7 +426,7 @@ jobs:
 
           # 上传所有存在的产物（用 continue-on-error 兼容缺失）
           ASSETS=""
-          for f in TomCatRunner-source.zip TomCatRunner-compiled-dlls.zip TomCatRunner-Win64.zip TomCatRunner-WebGL.zip; do
+          for f in TomCatRunner-source.zip TomCatRunner-compiled-dlls.zip TomCatRunner-Win64.zip TomCatRunner-WebGL.zip TomCatRunner-Android.apk; do
             if [ -f "dist/$f" ]; then ASSETS="$ASSETS dist/$f"; fi
           done
 
