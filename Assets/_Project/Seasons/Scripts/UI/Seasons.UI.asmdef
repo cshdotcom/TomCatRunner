@@ -1,0 +1,22 @@
+{
+    "name": "TomCatRunner.Seasons.UI",
+    "rootNamespace": "TomCatRunner.UI",
+    "references": [
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "UniRx",
+        "UniTask",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -139,6 +139,11 @@ namespace TomCatRunner.UI
             }
         }
 
+        /// <summary>
+        /// 同步触发命令（视图事件绑定用，内部 fire-and-forget）
+        /// </summary>
+        public void Execute() => ExecuteAsync().Forget();
+
         public void Dispose()
         {
             if (_disposed) return;
@@ -182,6 +187,11 @@ namespace TomCatRunner.UI
                 _isExecuting.Value = false;
             }
         }
+
+        /// <summary>
+        /// 同步触发命令（视图事件绑定用，内部 fire-and-forget）
+        /// </summary>
+        public void Execute(T parameter) => ExecuteAsync(parameter).Forget();
 
         public void Dispose()
         {

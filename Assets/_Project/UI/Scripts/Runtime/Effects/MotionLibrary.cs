@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using DG.Tweening;
 using Cysharp.Threading.Tasks;
 using TomCatRunner.Common;
+using TMPro;
 
 namespace TomCatRunner.UI
 {
@@ -311,7 +312,7 @@ namespace TomCatRunner.UI
                 {
                     var original = item.anchoredPosition;
                     item.anchoredPosition = original + slideFrom.Value;
-                    seq.Join(item.DOAnchorPos(original, itemDuration).SetEase(ease).SetDelay(delay), delay);
+                    seq.Join(item.DOAnchorPos(original, itemDuration).SetEase(ease).SetDelay(delay));
                 }
 
                 seq.Join(ScaleIn(item, itemDuration, ease, delay));
@@ -338,7 +339,7 @@ namespace TomCatRunner.UI
 
                 if (slideTo.HasValue)
                 {
-                    seq.Join(item.DOAnchorPos(item.anchoredPosition + slideTo.Value, itemDuration).SetEase(ease).SetDelay(delay), delay);
+                    seq.Join(item.DOAnchorPos(item.anchoredPosition + slideTo.Value, itemDuration).SetEase(ease).SetDelay(delay));
                 }
 
                 seq.Join(ScaleOut(item, itemDuration, ease, delay));
@@ -668,8 +669,8 @@ namespace TomCatRunner.UI
 
         private RectTransform _rect;
         private CanvasGroup _canvasGroup;
-        private Sequence _currentSequence;
-        private Sequence _loopSequence;
+        private Tween _currentSequence;
+        private Tween _loopSequence;
 
         public enum EnterAnimationType { None, Fade, Scale, Slide, Popup, Rotate }
         public enum ExitAnimationType { None, Fade, Scale, Slide, Popup }

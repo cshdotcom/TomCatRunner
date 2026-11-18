@@ -8,6 +8,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using TomCatRunner.Seasons;
 using TomCatRunner.Common;
+using System.Linq;
 
 namespace TomCatRunner.UI
 {
@@ -105,7 +106,7 @@ namespace TomCatRunner.UI
             _rarityLabelText.text = GetRarityLabel(reward.rarity);
 
             // 入场动画
-            await PlayEnterAnimationAsync(reward.rarity);
+            await PlayEnterAnimationAsync();
 
             // 等待点击领取
             await WaitForClaimAsync();

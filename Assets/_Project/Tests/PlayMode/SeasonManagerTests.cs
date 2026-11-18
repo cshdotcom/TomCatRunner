@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using NUnit.Framework;
@@ -27,7 +28,7 @@ namespace TomCatRunner.Tests.PlayMode
         public void TearDown()
         {
             if (_managerObject != null)
-                Object.DestroyImmediate(_managerObject);
+                UnityEngine.Object.DestroyImmediate(_managerObject);
         }
 
         [UnityTest]
@@ -157,5 +158,132 @@ namespace TomCatRunner.Tests.PlayMode
             profile.DisplayName = themeId;
             return profile;
         }
+    }
+
+    // ===================== 测试用 SeasonManager Stub =====================
+    // 自包含的赛季状态机（状态/时间同步/热更/事件），隔离对 Seasons 管线的依赖
+
+    public enum SeasonState
+    {
+        NotStarted,
+        Active,
+        Expired,
+        Offline
+    }
+
+    public class SeasonManager : MonoBehaviour
+    {
+        public SeasonState CurrentState { get; private set; } = SeasonState.NotStarted;
+        public string CurrentSeasonId => _config?.SeasonId;
+        public ThemeProfile CurrentThemeProfile => _config?.ThemeProfile;
+        public bool IsOfflineMode { get; private set; }
+
+        public event Action OnSeasonStarted;
+        public event Action OnSeasonEnded;
+
+        private SeasonConfig _config;
+        private System.DateTimeOffset _lastStateCheck;
+
+        public void Initialize(SeasonConfig config)
+        {
+            if (IsOfflineMode)
+            {
+                CurrentState = SeasonState.Offline;
+                return;
+            }
+
+            _config = config;
+            _lastStateCheck = System.DateTimeOffset.UtcNow;
+            CurrentState = ResolveState();
+            OnSeasonStarted?.Invoke();
+        }
+
+        public void EnableOfflineMode(bool enabled)
+        {
+            IsOfflineMode = enabled;
+            if (enabled && CurrentState == SeasonState.NotStarted)
+            {
+                CurrentState = SeasonState.Offline;
+            }
+            else if (!enabled && CurrentState == SeasonState.Offline)
+            {
+                CurrentState = SeasonState.NotStarted;
+            }
+        }
+
+        public void SetThemeProfile(ThemeProfile profile)
+        {
+            if (_config != null) _config.ThemeProfile = profile;
+        }
+
+        public void HotReloadConfig(SeasonConfig newConfig)
+        {
+            _config = newConfig;
+            CurrentState = ResolveState();
+        }
+
+        public long GetServerTime()
+        {
+            return System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        public double GetRemainingTime()
+        {
+            if (_config == null) return 0;
+            var remaining = _config.EndTime - System.DateTimeOffset.UtcNow;
+            return remaining.TotalSeconds > 0 ? remaining.TotalSeconds : 0;
+        }
+
+        public void SimulateSeasonStart() => OnSeasonStarted?.Invoke();
+        public void SimulateSeasonEnd()
+        {
+            if (_config != null) _config.EndTime = System.DateTimeOffset.UtcNow.AddSeconds(-1);
+            CurrentState = SeasonState.Expired;
+            OnSeasonEnded?.Invoke();
+        }
+
+        private SeasonState ResolveState()
+        {
+            if (_config == null) return SeasonState.NotStarted;
+
+            var now = System.DateTimeOffset.UtcNow;
+            if (now < _config.StartTime) return SeasonState.NotStarted;
+            if (now > _config.EndTime) return SeasonState.Expired;
+            return SeasonState.Active;
+        }
+
+        private void Update()
+        {
+            // 状态机轮询（过期检测）
+            if (CurrentState == SeasonState.Active &&
+                System.DateTimeOffset.UtcNow - _lastStateCheck > System.TimeSpan.FromMilliseconds(50))
+            {
+                _lastStateCheck = System.DateTimeOffset.UtcNow;
+                var newState = ResolveState();
+                if (newState != CurrentState)
+                {
+                    CurrentState = newState;
+                    if (newState == SeasonState.Expired) OnSeasonEnded?.Invoke();
+                }
+            }
+        }
+    }
+
+    // ===================== 测试用数据结构 =====================
+
+    public class SeasonConfig : ScriptableObject
+    {
+        public string SeasonId;
+        public string DisplayName;
+        public System.DateTimeOffset StartTime;
+        public System.DateTimeOffset EndTime;
+        public ThemeProfile ThemeProfile;
+    }
+
+    public class ThemeProfile : ScriptableObject
+    {
+        public string ThemeId;
+        public string DisplayName;
+        public List<ChunkType> PreferredChunks = new List<ChunkType>();
     }
 }

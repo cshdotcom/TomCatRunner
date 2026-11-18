@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using Cysharp.Threading.Tasks;
 using TomCatRunner.Common;
 
@@ -43,6 +44,8 @@ namespace TomCatRunner.Seasons
 
         // 属性
         public BattlePassTable CurrentTable => _currentTable;
+        /// <summary>当前通行证表（与 CurrentTable 同义，供 ViewModel 使用）</summary>
+        public BattlePassTable BattlePassTable => CurrentTable;
         public int CurrentLevel => _runtimeData?.battlePassLevel ?? 1;
         public int CurrentXp => _runtimeData?.battlePassXp ?? 0;
         public int XpToNextLevel => GetXpToNextLevel();
@@ -338,7 +341,8 @@ namespace TomCatRunner.Seasons
 
         /// <summary>
         /// 一键领取所有可用奖励
-        /// </summary        public async UniTask<List<RewardBundle>> ClaimAllAvailableAsync()
+        /// </summary>
+        public async UniTask<List<RewardBundle>> ClaimAllAvailableAsync()
         {
             var results = new List<RewardBundle>();
 
@@ -503,6 +507,49 @@ namespace TomCatRunner.Seasons
                 .Select(t => t.level)
                 .FirstOrDefault();
         }
+
+        /// <summary>
+        /// 获取 UI 快照数据（ViewModel 一次性拉取）
+        /// </summary>
+        public BattlePassViewDataSnapshot GetBattlePassViewData()
+        {
+            var runtime = _runtimeData;
+            return new BattlePassViewDataSnapshot
+            {
+                currentTier = CurrentLevel,
+                currentXP = CurrentXp,
+                nextTierXP = XpToNextLevel,
+                tierProgress = LevelProgress,
+                overallProgress = MaxLevel > 1
+                    ? Mathf.Clamp01((CurrentLevel - 1) / (float)(MaxLevel - 1))
+                    : 0f,
+                isPremiumUnlocked = IsPremiumUnlocked,
+                weeklyXPEarned = runtime?.battlePassXp ?? 0,
+                weeklyCap = WeeklyXpCap,
+                lastWeeklyReset = runtime?.lastLoginTimestamp ?? 0,
+                claimedFreeTiers = runtime?.claimedFreeTiers ?? new List<int>(),
+                claimedPremiumTiers = runtime?.claimedPremiumTiers ?? new List<int>()
+            };
+        }
+    }
+
+    /// <summary>
+    /// UI 一次性拉取的通行证快照数据
+    /// </summary>
+    [Serializable]
+    public class BattlePassViewDataSnapshot
+    {
+        public int currentTier;
+        public int currentXP;
+        public int nextTierXP;
+        public float tierProgress;
+        public float overallProgress;
+        public bool isPremiumUnlocked;
+        public int weeklyXPEarned;
+        public int weeklyCap;
+        public long lastWeeklyReset;
+        public List<int> claimedFreeTiers = new List<int>();
+        public List<int> claimedPremiumTiers = new List<int>();
     }
 
     /// <summary>

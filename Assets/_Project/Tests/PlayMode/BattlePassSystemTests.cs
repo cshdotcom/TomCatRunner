@@ -297,4 +297,96 @@ namespace TomCatRunner.Tests.PlayMode
         public int XPToNextLevel;
         public float Progress01;
     }
+
+    // ===================== 测试用 BattlePassSystem Stub =====================
+    // 自包含的双轨通行证实现（XP 曲线/领取/周上限/赛季过期），隔离对 Seasons 管线的依赖
+
+    public class BattlePassSystem : MonoBehaviour
+    {
+        private BattlePassTable _table;
+        private int _currentLevel = 1;
+        private int _currentXP;
+        private bool _premiumOwned;
+        private readonly HashSet<int> _claimedFree = new HashSet<int>();
+        private readonly HashSet<int> _claimedPremium = new HashSet<int>();
+        private System.DateTimeOffset _seasonEndTime = System.DateTimeOffset.MaxValue;
+
+        public BattlePassTable CurrentTable => _table;
+        public int MaxLevel => _table?.MaxLevel ?? 50;
+        public int CurrentLevel => _currentLevel;
+        public int WeeklyXPCap { get; set; } = 50000;
+        public int WeeklyXPEarned => _currentXP;
+        public bool IsPremiumOwned => _premiumOwned;
+        public bool IsExpired => System.DateTimeOffset.UtcNow >= _seasonEndTime;
+
+        public void Initialize(BattlePassTable table)
+        {
+            _table = table;
+            _currentLevel = 1;
+            _currentXP = 0;
+            _claimedFree.Clear();
+            _claimedPremium.Clear();
+            _seasonEndTime = table != null && table.SeasonEndTime != default
+                ? table.SeasonEndTime
+                : System.DateTimeOffset.MaxValue;
+        }
+
+        public void AddXP(int amount)
+        {
+            if (_table == null) return;
+
+            _currentXP = System.Math.Min(_currentXP + amount, WeeklyXPCap);
+            while (_currentLevel < MaxLevel && _currentXP >= GetXPRequiredForLevel(_currentLevel + 1))
+            {
+                _currentLevel++;
+            }
+        }
+
+        public int GetXPRequiredForLevel(int level)
+        {
+            if (_table == null) return int.MaxValue;
+            return System.Convert.ToInt32(_table.BaseXPPerLevel *
+                                           System.Math.Pow(_table.XPGrowthFactor, level - 1));
+        }
+
+        public BattlePassProgress GetProgress()
+        {
+            int nextXP = _currentLevel >= MaxLevel ? _currentXP : GetXPRequiredForLevel(_currentLevel + 1);
+            int prevXP = _currentLevel <= 1 ? 0 : GetXPRequiredForLevel(_currentLevel);
+            return new BattlePassProgress
+            {
+                CurrentLevel = _currentLevel,
+                CurrentXP = _currentXP,
+                XPToNextLevel = System.Math.Max(0, nextXP - _currentXP),
+                Progress01 = nextXP > prevXP
+                    ? UnityEngine.Mathf.Clamp01((float)(_currentXP - prevXP) / (nextXP - prevXP))
+                    : 1f
+            };
+        }
+
+        public bool CanClaimFreeReward(int level) => !IsExpired && level <= _currentLevel && !_claimedFree.Contains(level);
+        public bool CanClaimPremiumReward(int level) => !IsExpired && _premiumOwned && level <= _currentLevel && !_claimedPremium.Contains(level);
+        public bool IsFreeRewardClaimed(int level) => _claimedFree.Contains(level);
+        public bool IsPremiumRewardClaimed(int level) => _claimedPremium.Contains(level);
+
+        public void ClaimFreeReward(int level)
+        {
+            if (!CanClaimFreeReward(level)) return;
+            _claimedFree.Add(level);
+        }
+
+        public List<BattlePassReward> ClaimPremiumReward(int level)
+        {
+            if (!CanClaimPremiumReward(level)) return null;
+            _claimedPremium.Add(level);
+            return _table.PremiumRewards.FindAll(r => r.Level == level);
+        }
+
+        public BattlePassReward GetFreeReward(int level) => _table?.FreeRewards.Find(r => r.Level == level);
+        public BattlePassReward GetPremiumReward(int level) => _table?.PremiumRewards.Find(r => r.Level == level);
+
+        public void SetPremiumOwned(bool owned) => _premiumOwned = owned;
+
+        public void PurchasePremiumPass() => _premiumOwned = true;
+    }
 }

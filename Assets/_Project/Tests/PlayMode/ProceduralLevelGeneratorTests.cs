@@ -321,4 +321,95 @@ namespace TomCatRunner.Tests.PlayMode
         Hard,
         Expert
     }
+
+    // ===================== 测试用 ProceduralLevelGenerator Stub =====================
+    // 最小可用的语法驱动生成器，隔离对 Seasons 管线的依赖
+
+    public class ProceduralLevelGenerator : MonoBehaviour
+    {
+        public GrammarConfig Grammar;
+        public float LastGeneratedLength;
+
+        public void Initialize(GrammarConfig grammar)
+        {
+            Grammar = grammar;
+        }
+
+        public LevelData GenerateLevel(float length, Difficulty difficulty, int seed = 0, ThemeProfile theme = null)
+        {
+            LastGeneratedLength = length;
+
+            var random = seed != 0 ? new System.Random(seed) : new System.Random();
+            int segmentCount = Mathf.Max(1, Mathf.RoundToInt(length / 50f));
+            var segments = new List<LevelSegment>();
+
+            float difficultyWeight = difficulty == Difficulty.Easy ? 0.4f
+                : difficulty == Difficulty.Normal ? 0.6f
+                : difficulty == Difficulty.Hard ? 0.8f
+                : 1f;
+
+            for (int i = 0; i < segmentCount; i++)
+            {
+                // 从语法规则中按权重挑选下一个 Chunk 类型
+                ChunkType nextType = theme != null && theme.PreferredChunks != null && theme.PreferredChunks.Count > 0
+                    ? theme.PreferredChunks[random.Next(theme.PreferredChunks.Count)]
+                    : PickNext(random, difficultyWeight);
+                segments.Add(new LevelSegment
+                {
+                    ChunkType = nextType,
+                    Length = 50f,
+                    Position = new Vector3(0, 0, i * 50f),
+                    Rotation = Quaternion.identity
+                });
+            }
+
+            return new LevelData
+            {
+                Segments = segments,
+                TotalLength = length,
+                Seed = seed
+            };
+        }
+
+        /// <summary>离线烘焙：把运行时生成的关卡数据固化为可复用资产</summary>
+        public LevelDataAsset BakeLevelData(LevelData levelData, string levelId)
+        {
+            var asset = ScriptableObject.CreateInstance<LevelDataAsset>();
+            asset.LevelId = levelId;
+            asset.Segments = new List<LevelSegment>(levelData.Segments);
+            asset.TotalLength = levelData.TotalLength;
+            asset.Seed = levelData.Seed;
+            return asset;
+        }
+
+        private ChunkType PickNext(System.Random random, float difficultyWeight)
+        {
+            if (Grammar != null && Grammar.Rules != null && Grammar.Rules.Count > 0)
+            {
+                var rule = Grammar.Rules[random.Next(Grammar.Rules.Count)];
+                if (rule.To != null && rule.To.Count > 0)
+                {
+                    return rule.To[random.Next(rule.To.Count)];
+                }
+                return rule.From;
+            }
+
+            // 无语法时按难度输出基础序列
+            double roll = random.NextDouble();
+            if (roll < 0.4 * difficultyWeight) return ChunkType.Jump;
+            if (roll < 0.6 * difficultyWeight) return ChunkType.Slide;
+            return ChunkType.Straight;
+        }
+    }
+
+    // ThemeProfile 统一定义在 SeasonManagerTests.cs（同一命名空间）
+
+    // 烘焙后的关卡资产
+    public class LevelDataAsset : ScriptableObject
+    {
+        public string LevelId;
+        public List<LevelSegment> Segments = new List<LevelSegment>();
+        public float TotalLength;
+        public int Seed;
+    }
 }

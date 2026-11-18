@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -335,6 +336,20 @@ namespace TomCatRunner.UI
         public Sprite icon;
         public float remainingDuration;
         public float totalDuration;
+    }
+
+    /// <summary>
+    /// 道具类型
+    /// </summary>
+    public enum PowerupType
+    {
+        None,
+        Shield,       // 护盾
+        Magnet,       // 磁铁
+        SpeedBoost,   // 加速
+        DoubleCoins,  // 双倍金币
+        SlowMotion,   // 减速时间
+        ExtraLife     // 额外生命
     }
 
     [Serializable]

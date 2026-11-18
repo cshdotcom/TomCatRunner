@@ -1,0 +1,21 @@
+{
+    "name": "TomCatRunner.Core.Runtime",
+    "rootNamespace": "TomCatRunner.Core",
+    "references": [
+        "TomCatRunner.Common.Runtime",
+        "UniRx",
+        "UniTask",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "VContainer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

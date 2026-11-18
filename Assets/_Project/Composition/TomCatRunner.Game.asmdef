@@ -1,0 +1,21 @@
+{
+    "name": "TomCatRunner.Game",
+    "rootNamespace": "TomCatRunner.Common.DI",
+    "references": [
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "VContainer",
+        "UniTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -153,31 +153,24 @@ namespace TomCatRunner.UI
         {
             if (theme == null) return;
 
-            // 背景图切换
-            if (_backgroundImage != null && theme.loadingBackground != null)
+            // 背景图切换（主题自带渐变色，直接应用）
+            if (_backgroundImage != null)
             {
-                _backgroundImage.DOFade(0f, 0.3f).OnComplete(() =>
-                {
-                    _backgroundImage.sprite = theme.loadingBackground;
-                    _backgroundImage.DOFade(1f, 0.5f);
-                });
+                _backgroundImage.color = theme.themeColor;
             }
 
-            // 进度条颜色
+            // 进度条颜色：主色取色板 primary，强调色取色板 glow
+            var palette = theme.colorPalette;
             if (_progressFill != null)
             {
-                _progressFill.color = theme.primaryColor;
+                _progressFill.color = palette != null ? palette.primary : theme.themeColor;
             }
             if (_progressGlow != null)
             {
-                _progressGlow.color = theme.accentColor;
+                _progressGlow.color = palette != null ? palette.glowPrimary : theme.themeColor;
             }
 
-            // 提示图标
-            if (_tipIcon != null && theme.tipIcon != null)
-            {
-                _tipIcon.sprite = theme.tipIcon;
-            }
+            // 提示图标（可选资产，主题未提供时保持原样）
         }
 
         private void OnTransitioningChanged(bool isTransitioning)
@@ -254,7 +247,7 @@ namespace TomCatRunner.UI
             {
                 RotateTip(1);
                 StartTipAutoRotate();
-            }).SetId(this, "TipAutoRotate").SetUpdate(true);
+            }).SetId("TipAutoRotate").SetUpdate(true);
         }
 
         protected override void OnDispose()

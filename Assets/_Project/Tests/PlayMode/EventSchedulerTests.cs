@@ -364,4 +364,67 @@ namespace TomCatRunner.Tests.PlayMode
         public bool CanClaim;
         public bool IsClaimed;
     }
+
+    // ===================== 测试用 EventScheduler Stub =====================
+    // 自包含的活动调度器（时间窗激活/进度/领取/每日重置/优先级排序），隔离对 Seasons 管线的依赖
+
+    public class EventScheduler : MonoBehaviour
+    {
+        private readonly List<MiniEvent> _events = new List<MiniEvent>();
+        private System.TimeSpan _timeOffset;
+
+        public IReadOnlyList<MiniEvent> ActiveEvents => _events;
+
+        public void Initialize(List<MiniEvent> events)
+        {
+            _events.Clear();
+            if (events != null) _events.AddRange(events);
+        }
+
+        public MiniEvent GetEvent(string eventId) => _events.Find(e => e.EventId == eventId);
+
+        public void AddProgress(string eventId, int amount)
+        {
+            var evt = GetEvent(eventId);
+            if (evt == null) return;
+            evt.CurrentProgress = System.Math.Min(evt.CurrentProgress + amount, evt.MaxProgress);
+        }
+
+        public List<EventReward> ClaimReward(string eventId)
+        {
+            var evt = GetEvent(eventId);
+            if (evt == null || !evt.CanClaimReward) return null;
+            evt.IsRewardClaimed = true;
+            return evt.Rewards;
+        }
+
+        public List<EventReward> GetRewardPreview(string eventId) => GetEvent(eventId)?.Rewards;
+
+        public List<MiniEvent> GetSortedEvents()
+        {
+            var sorted = new List<MiniEvent>(_events);
+            sorted.Sort((a, b) => b.Priority.CompareTo(a.Priority));
+            return sorted;
+        }
+
+        public void SimulateTimeAdvance(System.TimeSpan delta)
+        {
+            _timeOffset += delta;
+            foreach (var evt in _events)
+            {
+                evt.StartTime -= delta;
+                evt.EndTime -= delta;
+            }
+        }
+
+        public void SimulateDailyReset()
+        {
+            foreach (var evt in _events)
+            {
+                if (!evt.ResetsDaily) continue;
+                evt.CurrentProgress = 0;
+                evt.IsRewardClaimed = false;
+            }
+        }
+    }
 }

@@ -114,10 +114,10 @@ namespace TomCatRunner.UI
             // 背景过渡
             if (info.backgroundSprite != null)
             {
-                _backgroundImage.DOCrossFadeAlpha(0f, 0.3f).OnComplete(() =>
+                _backgroundImage.DOFade(0f, 0.3f).OnComplete(() =>
                 {
                     _backgroundImage.sprite = info.backgroundSprite;
-                    _backgroundImage.DOCrossFadeAlpha(1f, 0.5f);
+                    _backgroundImage.DOFade(1f, 0.5f);
                 });
             }
 
@@ -219,11 +219,14 @@ namespace TomCatRunner.UI
 
             _currentThemeNameText.text = theme.displayName;
 
-            // 粒子系统颜色更新
+            // 粒子系统颜色更新（取自主题色板）
             if (_ambientParticles != null)
             {
+                var palette = theme.colorPalette;
+                var particleColor = palette != null ? palette.particlePrimary : theme.themeColor;
+                var glowColor = palette != null ? palette.glowPrimary : theme.themeColor;
                 var main = _ambientParticles.main;
-                main.startColor = new ParticleSystem.MinMaxGradient(theme.particleColor, theme.glowColor);
+                main.startColor = new ParticleSystem.MinMaxGradient(particleColor, glowColor);
             }
         }
 
@@ -361,9 +364,9 @@ namespace TomCatRunner.UI
             {
                 SeasonInfo.Value = new SeasonInfo
                 {
-                    seasonId = config.seasonId,
-                    displayName = config.displayName,
-                    description = config.description,
+                    seasonId = config.seasonId.ToString(),
+                    displayName = config.seasonName,
+                    description = $"{config.shortCode} 赛季 · {config.seasonName}",
                     backgroundSprite = null, // 从 ThemeProfile 加载
                     themeDecoration = null
                 };
@@ -373,15 +376,21 @@ namespace TomCatRunner.UI
 
             // 阶段信息
             var runtimeData = _seasonManager.RuntimeData;
-            if (runtimeData != null && config != null && runtimeData.currentPhaseIndex < config.phases.Length)
+            if (runtimeData != null && config != null && config.phases != null && config.phases.Length > 0)
             {
-                var phase = config.phases[runtimeData.currentPhaseIndex];
+                int phaseIndex = _seasonManager.CurrentPhase == SeasonPhase.Preheat ? 0
+                    : _seasonManager.CurrentPhase == SeasonPhase.Active
+                        ? Mathf.Clamp((int)((DateTimeOffset.UtcNow.ToUnixTimeSeconds() - config.seasonStartTimestamp) / 86400L) / 14, 0, config.phases.Length - 1)
+                        : config.phases.Length - 1;
+                var phase = config.phases[phaseIndex];
                 PhaseInfo.Value = new PhaseInfo
                 {
-                    name = phase.name,
-                    description = phase.description,
+                    name = phase.phaseName,
+                    description = $"阶段 {phaseIndex + 1}/{config.phases.Length}",
                     icon = null,
-                    progress = runtimeData.phaseProgress
+                    progress = _seasonManager.GetTimeUntilSeasonEnd().Ticks > 0
+                        ? 1f - Mathf.Clamp01((float)_seasonManager.GetTimeUntilSeasonEnd().Ticks / (float)TimeSpan.FromDays(60).Ticks)
+                        : 0f
                 };
             }
 
@@ -433,14 +442,10 @@ namespace TomCatRunner.UI
                 var config = _seasonManager.CurrentConfig;
                 if (config != null)
                 {
-                    var runtimeData = _seasonManager.RuntimeData;
-                    if (runtimeData != null)
-                    {
-                        long seasonEnd = config.seasonStartTimestamp + config.seasonDurationDays * 86400L;
-                        long now = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
-                        long remaining = Math.Max(0, seasonEnd - now);
-                        // 更新 UI...
-                    }
+                    long seasonEnd = config.seasonEndTimestamp;
+                    long now = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds();
+                    long remaining = Math.Max(0, seasonEnd - now);
+                    // 更新 UI...
                 }
             }
         }

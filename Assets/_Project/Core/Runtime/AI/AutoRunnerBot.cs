@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.AI;
 using Cysharp.Threading.Tasks;
 using TomCatRunner.Core;
+using TomCatRunner.Core.Generation;
+using TomCatRunner.Core.Level;
 using TomCatRunner.Common;
 
 namespace TomCatRunner.Core.AI
@@ -137,13 +139,21 @@ namespace TomCatRunner.Core.AI
 
         private void Start()
         {
-            _levelStreamer = FindObjectOfType<LevelStreamer>();
-            _levelGenerator = FindObjectOfType<ProceduralLevelGenerator>();
-
+            // LevelStreamer / ProceduralLevelGenerator 为 VContainer 管理的 POCO，
+            // 由引导流程调用 BindPipeline 注入；独立运行时保持为空也能工作。
             if (_enableValidation)
             {
                 StartValidation().Forget();
             }
+        }
+
+        /// <summary>
+        /// 绑定 Core 流式加载管线（由 GameLifetimeScope / LevelValidator 调用）
+        /// </summary>
+        public void BindPipeline(LevelStreamer streamer, ProceduralLevelGenerator generator)
+        {
+            _levelStreamer = streamer;
+            _levelGenerator = generator;
         }
 
         private async UniTaskVoid StartValidation()
@@ -560,6 +570,11 @@ namespace TomCatRunner.Core.AI
             return (lane - 1) * 3f; // 车道宽度 3 单位
         }
 
+        private void QueueAction(BotAction action)
+        {
+            _actionQueue.Enqueue(action);
+        }
+
         private int GetLaneFromPosition(float x)
         {
             return Mathf.Clamp(Mathf.RoundToInt(x / 3f + 1), 0, 2);
@@ -568,12 +583,12 @@ namespace TomCatRunner.Core.AI
         private bool HasReachedEnd()
         {
             // 检查是否到达关卡终点
-            return _distanceTraveled > (_levelGenerator ? _levelGenerator.LastGeneratedLength : 1000f);
+            return _distanceTraveled > (_levelGenerator != null ? _levelGenerator.TotalLevelLength : 1000f);
         }
 
         private void LogValidationResult()
         {
-            _validationResult.CompletionRate = _distanceTraveled / (_levelGenerator ? _levelGenerator.LastGeneratedLength : 1000f);
+            _validationResult.CompletionRate = _distanceTraveled / (_levelGenerator != null ? _levelGenerator.TotalLevelLength : 1000f);
             _validationResult.TotalObstacles = _obstaclesAvoided + _obstaclesHit;
             _validationResult.FairnessScore = _obstaclesAvoided > 0 ? (float)_obstaclesAvoided / (_obstaclesAvoided + _obstaclesHit) : 1f;
 

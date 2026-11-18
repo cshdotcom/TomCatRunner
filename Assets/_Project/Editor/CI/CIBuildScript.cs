@@ -74,12 +74,12 @@ namespace TomCatRunner.Editor.CI
             PlayerSettings.SetGraphicsAPIs(BuildTarget.WebGL, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
 
             // 脚本后端
-            PlayerSettings.SetScriptingBackend(BuildTarget.StandaloneWindows64, ScriptingImplementation.IL2CPP);
-            PlayerSettings.SetScriptingBackend(BuildTarget.WebGL, ScriptingImplementation.IL2CPP);
+            PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.IL2CPP);
+            PlayerSettings.SetScriptingBackend(BuildTargetGroup.WebGL, ScriptingImplementation.IL2CPP);
 
             // IL2CPP 优化
-            PlayerSettings.SetIl2CppCompilerConfiguration(BuildTarget.StandaloneWindows64, Il2CppCompilerConfiguration.Release);
-            PlayerSettings.SetIl2CppCompilerConfiguration(BuildTarget.WebGL, Il2CppCompilerConfiguration.Release);
+            PlayerSettings.SetIl2CppCompilerConfiguration(BuildTargetGroup.Standalone, Il2CppCompilerConfiguration.Release);
+            PlayerSettings.SetIl2CppCompilerConfiguration(BuildTargetGroup.WebGL, Il2CppCompilerConfiguration.Release);
 
             // 压缩设置
             PlayerSettings.defaultIsNativeResolution = true;
@@ -89,8 +89,8 @@ namespace TomCatRunner.Editor.CI
 
             // 优化设置
             PlayerSettings.stripEngineCode = true;
-            PlayerSettings.SetManagedStrippingLevel(BuildTarget.StandaloneWindows64, ManagedStrippingLevel.High);
-            PlayerSettings.SetManagedStrippingLevel(BuildTarget.WebGL, ManagedStrippingLevel.High);
+            PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.Standalone, ManagedStrippingLevel.High);
+            PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.WebGL, ManagedStrippingLevel.High);
 
             // WebGL 特定设置
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli;
@@ -98,9 +98,10 @@ namespace TomCatRunner.Editor.CI
             PlayerSettings.WebGL.dataCaching = true;
             PlayerSettings.WebGL.threadsSupport = false; // 需要 SharedArrayBuffer 支持
 
-            // URP 设置
-            GraphicsSettings.renderPipelineAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset>(
+            // 渲染管线资产（内置管线；若未来引入 URP，在这里加载资产）
+            var rpAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.Rendering.RenderPipelineAsset>(
                 "Assets/_Project/Settings/URP/URPAsset.asset");
+            UnityEngine.Rendering.GraphicsSettings.renderPipelineAsset = rpAsset;
 
             // Quality 设置
             QualitySettings.SetQualityLevel(2, true); // Medium quality for CI
@@ -123,7 +124,7 @@ namespace TomCatRunner.Editor.CI
                 scenes = scenes,
                 locationPathName = fullPath,
                 target = BuildTarget.StandaloneWindows64,
-                options = BuildOptions.StrictMode | BuildOptions.DeterministicAssetBundle
+                options = BuildOptions.StrictMode
             };
 
             Debug.Log($"[CIBuildScript] Building Windows Standalone to: {fullPath}");
@@ -150,7 +151,7 @@ namespace TomCatRunner.Editor.CI
                 scenes = scenes,
                 locationPathName = buildPath,
                 target = BuildTarget.WebGL,
-                options = BuildOptions.StrictMode | BuildOptions.DeterministicAssetBundle
+                options = BuildOptions.StrictMode
             };
 
             Debug.Log($"[CIBuildScript] Building WebGL to: {buildPath}");
@@ -181,21 +182,12 @@ namespace TomCatRunner.Editor.CI
             }
             Directory.CreateDirectory(buildPath);
 
-            // 设置构建路径
-            settings.RemoteCatalogBuildPath = buildPath;
-            settings.RemoteCatalogLoadPath = "{UnityEngine.AddressableAssets.Addressables.RuntimePath}/";
+            // 设置构建路径（通过 Profile 变量）
+            settings.RemoteCatalogBuildPath.SetVariableByName(settings, "RemoteBuildPath");
+            settings.RemoteCatalogLoadPath.SetVariableByName(settings, "RemoteLoadPath");
 
-            // 执行构建
-            var buildOperation = AddressableAssetSettings.BuildPlayerContent();
-            while (!buildOperation.IsDone)
-            {
-                // 等待构建完成
-            }
-
-            if (buildOperation.OperationException != null)
-            {
-                throw buildOperation.OperationException;
-            }
+            // 执行构建（同步完成，失败时抛异常）
+            AddressableAssetSettings.BuildPlayerContent();
 
             Debug.Log("[CIBuildScript] Addressables build completed successfully!");
 

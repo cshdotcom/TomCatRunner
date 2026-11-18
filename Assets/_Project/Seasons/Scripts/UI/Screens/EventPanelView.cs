@@ -157,7 +157,7 @@ namespace TomCatRunner.UI
                     _eventCards.Add(card);
                 }
 
-                card.SetData(events[i], () => OnCardClicked(card, events[i]));
+                card.SetData(events[i], (clickedCard, clickedData) => OnCardClicked(clickedCard, clickedData));
                 card.gameObject.SetActive(true);
 
                 // 入场动画延迟
@@ -328,7 +328,7 @@ namespace TomCatRunner.UI
         public void SetSelected(bool selected)
         {
             _background.color = selected ? new Color(1, 1, 1, 0.2f) : Color.clear;
-            _label.fontWeight = selected ? FontWeight.Bold : FontWeight.Normal;
+            _label.fontWeight = selected ? FontWeight.Bold : FontWeight.Regular;
         }
     }
 
@@ -494,13 +494,5 @@ namespace TomCatRunner.UI
         public RewardRarity rarity;
     }
 
-    public enum RewardRarity
-    {
-        Common = 0,
-        Uncommon = 1,
-        Rare = 2,
-        Epic = 3,
-        Legendary = 4,
-        Mythic = 5
-    }
+    // RewardRarity 统一定义在 RewardPopupView.cs（同一程序集/命名空间）
 }

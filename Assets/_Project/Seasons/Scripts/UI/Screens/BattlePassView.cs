@@ -297,35 +297,36 @@ namespace TomCatRunner.UI
             var config = _seasonManager.CurrentConfig;
 
             var tiers = new List<BattlePassTierViewData>();
-            if (_battlePassSystem.BattlePassTable != null)
+            if (_battlePassSystem.BattlePassTable != null && _battlePassSystem.BattlePassTable.tiers != null)
             {
                 foreach (var tier in _battlePassSystem.BattlePassTable.tiers)
                 {
                     tiers.Add(new BattlePassTierViewData
                     {
-                        tier = tier.tier,
+                        tier = tier.level,
                         xpRequired = tier.xpRequired,
                         freeReward = ConvertReward(tier.freeReward),
                         premiumReward = ConvertReward(tier.premiumReward),
                         isMilestone = tier.isMilestone,
                         milestoneTitle = tier.milestoneTitle,
-                        milestoneReward = tier.isMilestone && tier.premiumReward != null ? ConvertReward(tier.premiumReward) : null,
-                        unlockDescription = tier.unlockDescription,
-                        freeClaimed = bpData.claimedFreeTiers.Contains(tier.tier),
-                        premiumClaimed = bpData.claimedPremiumTiers.Contains(tier.tier),
-                        canClaimFree = tier.tier <= bpData.currentTier && !bpData.claimedFreeTiers.Contains(tier.tier),
-                        canClaimPremium = bpData.isPremiumUnlocked && tier.tier <= bpData.currentTier && !bpData.claimedPremiumTiers.Contains(tier.tier)
+                        milestoneReward = tier.isMilestone ? ConvertReward(tier.premiumReward) : null,
+                        unlockDescription = tier.isMilestone ? tier.milestoneTitle : $"Tier {tier.level}",
+                        freeClaimed = bpData.claimedFreeTiers.Contains(tier.level),
+                        premiumClaimed = bpData.claimedPremiumTiers.Contains(tier.level),
+                        canClaimFree = tier.level <= bpData.currentTier && !bpData.claimedFreeTiers.Contains(tier.level),
+                        canClaimPremium = bpData.isPremiumUnlocked && tier.level <= bpData.currentTier && !bpData.claimedPremiumTiers.Contains(tier.level)
                     });
                 }
             }
 
             ViewData.Value = new BattlePassViewData
             {
-                seasonName = config?.displayName ?? "Season",
+                seasonName = config?.seasonName ?? "Season",
                 currentTier = bpData.currentTier,
                 currentXP = bpData.currentXP,
                 nextTierXP = bpData.nextTierXP,
                 overallProgress = bpData.overallProgress,
+                isPremium = bpData.isPremiumUnlocked,
                 tiers = tiers
             };
 
@@ -340,17 +341,48 @@ namespace TomCatRunner.UI
             };
         }
 
-        private RewardViewData ConvertReward(RewardItem item)
+        private RewardViewData ConvertReward(RewardBundle bundle)
         {
-            if (item == null) return null;
+            if (bundle?.items == null || bundle.items.Length == 0) return null;
+            // 一个奖励格展示首个代表性物品
+            var item = bundle.items[0];
             return new RewardViewData
             {
-                type = item.type,
+                type = MapRewardType(item.type),
                 itemId = item.itemId,
                 quantity = item.quantity,
-                rarity = item.rarity,
+                rarity = MapRarity(item.rarity),
                 icon = null // 运行时从资源加载
             };
+        }
+
+        private static RewardType MapRewardType(TomCatRunner.Seasons.RewardType type)
+        {
+            switch (type)
+            {
+                case TomCatRunner.Seasons.RewardType.Skin: return RewardType.Skin;
+                case TomCatRunner.Seasons.RewardType.Mount: return RewardType.Character;
+                case TomCatRunner.Seasons.RewardType.Pet: return RewardType.Character;
+                case TomCatRunner.Seasons.RewardType.Emote: return RewardType.Custom;
+                case TomCatRunner.Seasons.RewardType.Title: return RewardType.Custom;
+                case TomCatRunner.Seasons.RewardType.ProfileFrame: return RewardType.Custom;
+                case TomCatRunner.Seasons.RewardType.LootBox: return RewardType.Custom;
+                case TomCatRunner.Seasons.RewardType.Experience: return RewardType.BattlePassXP;
+                default: return RewardType.Currency;
+            }
+        }
+
+        private static Rarity MapRarity(TomCatRunner.Seasons.Rarity rarity)
+        {
+            switch (rarity)
+            {
+                case TomCatRunner.Seasons.Rarity.Uncommon: return Rarity.Uncommon;
+                case TomCatRunner.Seasons.Rarity.Rare: return Rarity.Rare;
+                case TomCatRunner.Seasons.Rarity.Epic: return Rarity.Epic;
+                case TomCatRunner.Seasons.Rarity.Legendary: return Rarity.Legendary;
+                case TomCatRunner.Seasons.Rarity.Mythic: return Rarity.Mythic;
+                default: return Rarity.Common;
+            }
         }
 
         private async UniTask OnClose()
@@ -387,6 +419,7 @@ namespace TomCatRunner.UI
         public int currentXP;
         public int nextTierXP;
         public float overallProgress;
+        public bool isPremium;
         public List<BattlePassTierViewData> tiers;
     }
 

@@ -244,11 +244,13 @@ namespace TomCatRunner.Tests.PlayMode
         public IEnumerator Bot_DifferentDifficulties_AffectSpeed()
         {
             _bot.SetDifficulty(AutoRunnerBot.BotDifficulty.Easy);
-            float easySpeed = GetPrivateField<float>(_bot, "_difficulty") == AutoRunnerBot.BotDifficulty.Easy ? 15f : 20f;
+            Assert.AreEqual(AutoRunnerBot.BotDifficulty.Easy,
+                GetPrivateField<AutoRunnerBot.BotDifficulty>(_bot, "_difficulty"));
 
             _bot.SetDifficulty(AutoRunnerBot.BotDifficulty.Expert);
-            // 验证速度设置不同
-            Assert.AreEqual(AutoRunnerBot.BotDifficulty.Expert, GetPrivateField<AutoRunnerBot.BotDifficulty>(_bot, "_difficulty"));
+            Assert.AreEqual(AutoRunnerBot.BotDifficulty.Expert,
+                GetPrivateField<AutoRunnerBot.BotDifficulty>(_bot, "_difficulty"));
+            yield return null;
         }
 
         [UnityTest]
@@ -287,7 +289,7 @@ namespace TomCatRunner.Tests.PlayMode
             var obstacle = GameObject.CreatePrimitive(PrimitiveType.Cube);
             obstacle.transform.position = position;
             obstacle.transform.localScale = new Vector3(3, 2, 3);
-            obstacle.AddComponent<AutoRunnerBot.LevelObstacle>().ObstacleType = type;
+            obstacle.AddComponent<LevelObstacle>().ObstacleType = type;
             return obstacle;
         }
 
@@ -296,7 +298,7 @@ namespace TomCatRunner.Tests.PlayMode
             var collectible = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             collectible.transform.position = position;
             collectible.transform.localScale = Vector3.one;
-            collectible.AddComponent<AutoRunnerBot.LevelCollectible>().CollectibleType = type;
+            collectible.AddComponent<LevelCollectible>().CollectibleType = type;
             var collider = collectible.GetComponent<Collider>();
             collider.isTrigger = true;
             return collectible;

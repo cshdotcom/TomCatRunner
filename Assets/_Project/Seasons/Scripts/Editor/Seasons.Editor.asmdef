@@ -1,14 +1,23 @@
 {
-  "name": "TomCatRunner.Seasons.Editor",
-  "references": [
-    "TomCatRunner.Seasons.Runtime",
-    "TomCatRunner.Core.Editor"
-  ],
-  "includePlatforms": ["Editor"],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": []
+    "name": "TomCatRunner.Seasons.Editor",
+    "rootNamespace": "TomCatRunner.Seasons.Editor",
+    "references": [
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

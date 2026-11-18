@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace TomCatRunner.UI
@@ -5,6 +6,7 @@ namespace TomCatRunner.UI
     /// <summary>
     /// 主题色板 - 定义一套完整的 UI 色彩系统
     /// 支持亮/暗模式、高对比度、无障碍适配
+    /// （与 Seasons.ThemeProfile 的关联由 Seasons 侧的 colorPalette 字段表达）
     /// </summary>
     [CreateAssetMenu(fileName = "ThemeColorPalette", menuName = "TomCatRunner/UI/Theme Color Palette")]
     public class ThemeColorPalette : ScriptableObject
@@ -12,7 +14,6 @@ namespace TomCatRunner.UI
         [Header("基本信息")]
         public string paletteId;
         public string displayName;
-        public ThemeProfile linkedTheme;  // 关联的赛季主题
 
         [Header("核心色彩 (Material Design 3 风格)")]
 

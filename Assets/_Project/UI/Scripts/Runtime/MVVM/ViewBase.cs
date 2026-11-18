@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UniRx;
 using Cysharp.Threading.Tasks;
+using DG.Tweening;
 
 namespace TomCatRunner.UI
 {
@@ -113,8 +114,14 @@ namespace TomCatRunner.UI
             await sequence.AsyncWaitForCompletion();
         }
 
+        /// <summary>
+        /// 视图销毁前的清理钩子
+        /// </summary>
+        protected virtual void OnDispose() { }
+
         protected virtual void OnDestroy()
         {
+            OnDispose();
             BindDisposables.Dispose();
         }
     }

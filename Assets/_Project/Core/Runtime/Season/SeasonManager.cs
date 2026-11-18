@@ -7,7 +7,11 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using VContainer;
+using VContainer.Unity;
+using TomCatRunner.Common;
 using TomCatRunner.Common.Reactive;
+using TomCatRunner.Core.Networking;
+using TomCatRunner.Core.Data;
 
 namespace TomCatRunner.Core.Season
 {
@@ -24,13 +28,13 @@ namespace TomCatRunner.Core.Season
 
         private readonly MockServer _mockServer;
         private readonly MessageBroker _messageBroker;
-        private readonly GameLifetimeScope.GameConfig _config;
+        private readonly GameConfig _config;
 
         private SeasonConfig _currentSeason;
         private ThemeProfile _currentTheme;
         private CancellationTokenSource _cts;
         private bool _isPaused;
-        private DateTime _serverTimeOffset;
+        private TimeSpan _serverTimeOffset;
         private bool _initialized;
 
         // 缓存的所有赛季配置
@@ -38,7 +42,7 @@ namespace TomCatRunner.Core.Season
         private AsyncOperationHandle<IList<SeasonConfig>> _loadHandle;
 
         [Inject]
-        public SeasonManager(MockServer mockServer, MessageBroker messageBroker, GameLifetimeScope.GameConfig config)
+        public SeasonManager(MockServer mockServer, MessageBroker messageBroker, GameConfig config)
         {
             _mockServer = mockServer;
             _messageBroker = messageBroker;

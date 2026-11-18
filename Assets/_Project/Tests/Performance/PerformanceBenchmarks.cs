@@ -8,6 +8,7 @@ using UnityEngine.Profiling;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Burst;
+using Unity.Mathematics;
 using TomCatRunner.Core;
 using TomCatRunner.Seasons;
 using TomCatRunner.UI;
@@ -26,7 +27,6 @@ namespace TomCatRunner.Tests.Performance
         private const long TARGET_MEMORY_MB = 1200; // 1.2GB
 
         [Test]
-        [Performance]
         public void LevelStreamer_Performance_Streaming100Chunks()
         {
             var streamer = CreateLevelStreamer();
@@ -65,7 +65,6 @@ namespace TomCatRunner.Tests.Performance
         }
 
         [Test]
-        [Performance]
         public void ProceduralLevelGenerator_Performance_Generate10km()
         {
             var generator = new GameObject("Generator").AddComponent<ProceduralLevelGenerator>();
@@ -90,7 +89,6 @@ namespace TomCatRunner.Tests.Performance
         }
 
         [Test]
-        [Performance]
         public void BattlePassSystem_Performance_XPCalculation()
         {
             var system = new GameObject("BattlePass").AddComponent<BattlePassSystem>();
@@ -116,7 +114,6 @@ namespace TomCatRunner.Tests.Performance
         }
 
         [Test]
-        [Performance]
         public void EventScheduler_Performance_ConcurrentEvents()
         {
             var scheduler = new GameObject("Events").AddComponent<EventScheduler>();
@@ -144,7 +141,6 @@ namespace TomCatRunner.Tests.Performance
         }
 
         [Test]
-        [Performance]
         public void UIShaderLib_Performance_MaterialSwitching()
         {
             var canvas = new GameObject("Canvas").AddComponent<Canvas>();
@@ -164,15 +160,11 @@ namespace TomCatRunner.Tests.Performance
             {
                 foreach (var img in images)
                 {
-                    UIShaderLib.ApplySDFRoundedRect(img, new UIShaderLib.SDFRectParams
-                    {
-                        Radius = new Vector4(10, 10, 10, 10),
-                        BorderWidth = 2,
-                        BorderColor = Color.white,
-                        ShadowOffset = Vector2.zero,
-                        ShadowColor = Color.black,
-                        GlowIntensity = 0
-                    });
+                    UIShaderLib.ApplySDFRoundedRect(img,
+                        cornerRadius: 10f,
+                        borderWidth: 2f,
+                        borderColor: Color.white,
+                        shadowColor: Color.black);
                 }
             }
 
@@ -185,7 +177,6 @@ namespace TomCatRunner.Tests.Performance
         }
 
         [Test]
-        [Performance]
         public void UIParticleSystem_Performance_1000Particles()
         {
             var canvas = new GameObject("Canvas").AddComponent<Canvas>();
@@ -198,13 +189,11 @@ namespace TomCatRunner.Tests.Performance
 
             for (int frame = 0; frame < MEASUREMENT_FRAMES; frame++)
             {
-                // 每帧发射 20 个粒子
+                // 每帧发射 20 个粒子（粒子系统在 Update 中自行推进）
                 for (int i = 0; i < 20; i++)
                 {
-                    particleSystem.EmitBurst(UIParticleSystem.Preset.CoinBurst, UnityEngine.Random.insideUnitCircle * 100);
+                    particleSystem.Burst(UnityEngine.Random.insideUnitCircle * 100, null, 1);
                 }
-
-                particleSystem.ManualUpdate(Time.deltaTime);
             }
 
             stopwatch.Stop();
@@ -218,7 +207,6 @@ namespace TomCatRunner.Tests.Performance
         }
 
         [Test]
-        [Performance]
         public void SeasonManager_Performance_ThemeSwitch()
         {
             var manager = new GameObject("SeasonManager").AddComponent<SeasonManager>();
@@ -241,7 +229,6 @@ namespace TomCatRunner.Tests.Performance
         }
 
         [Test]
-        [Performance]
         public void Memory_Baseline_UnderLimit()
         {
             // 强制 GC
@@ -257,7 +244,6 @@ namespace TomCatRunner.Tests.Performance
         }
 
         [Test]
-        [Performance]
         public void DrawCalls_UI_Batched()
         {
             var canvas = new GameObject("Canvas").AddComponent<Canvas>();
@@ -299,7 +285,6 @@ namespace TomCatRunner.Tests.Performance
         }
 
         [Test]
-        [Performance]
         public void JobSystem_ParallelLevelGeneration()
         {
             // 测试 Burst/Job 系统并行生成

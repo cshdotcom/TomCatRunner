@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 namespace TomCatRunner.Core.Data
 {
@@ -27,7 +28,7 @@ namespace TomCatRunner.Core.Data
         [SerializeField] private ThemeAssets _assets = new();
 
         [Header("Particle Presets Override")]
-        [SerializeField] private UIParticlePreset[] _particleOverrides;
+        [SerializeField] private UnityEngine.ParticleSystem[] _particleOverrides;
 
         // Properties
         public string ThemeId => _themeId;
@@ -37,7 +38,7 @@ namespace TomCatRunner.Core.Data
         public ShaderParameters ShaderParams => _shaderParams;
         public AudioProfile AudioProfile => _audioProfile;
         public ThemeAssets Assets => _assets;
-        public UIParticlePreset[] ParticleOverrides => _particleOverrides;
+        public UnityEngine.ParticleSystem[] ParticleOverrides => _particleOverrides;
 
 #if UNITY_EDITOR
         private void OnValidate()

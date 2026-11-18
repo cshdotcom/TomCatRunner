@@ -2,33 +2,33 @@
     "name": "TomCatRunner.Tests",
     "rootNamespace": "TomCatRunner.Tests",
     "references": [
-        "TomCatRunner.Seasons.Runtime",
+        "TomCatRunner.Common.Runtime",
         "TomCatRunner.Core.Runtime",
         "TomCatRunner.UI.Runtime",
-        "TomCatRunner.Common.Runtime",
-        "UnityEngine.TestRunner",
+        "TomCatRunner.Seasons.Runtime",
+        "TomCatRunner.Game",
+        "UniRx",
+        "UniTask",
+        "VContainer",
         "UnityEngine.UI",
         "Unity.TextMeshPro",
-        "com.hadashikick.vcontainer",
-        "com.cysharp.unirx",
-        "com.cysharp.unitask",
-        "com.demigiant.dotween"
+        "Unity.Addressables",
+        "Unity.Burst",
+        "UnityEngine.TestRunner"
     ],
     "includePlatforms": [
-        "Editor",
-        "Standalone",
-        "WebGL",
-        "Android"
+        "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [
-        "UnityEngine.TestRunner",
-        "Unity.TestTools.CodeCoverage"
+        "nunit.framework.dll"
     ],
-    "autoReferenced": true,
-    "defineConstraints": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }

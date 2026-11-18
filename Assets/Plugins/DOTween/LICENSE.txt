@@ -1,0 +1,3 @@
+DOTween by Daniele Giardini (http://dotween.demigiant.com)
+Free version - redistributed unmodified within this project.
+Get DOTween: http://dotween.demigiant.com/download.php

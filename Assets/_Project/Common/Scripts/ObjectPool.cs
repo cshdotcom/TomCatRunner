@@ -38,7 +38,7 @@ namespace TomCatRunner.Common
 
         private T CreateInstance()
         {
-            var obj = Object.Instantiate(_prefab, _parent);
+            var obj = UnityEngine.Object.Instantiate(_prefab, _parent);
             obj.gameObject.SetActive(false);
             _onCreate?.Invoke(obj);
             return obj;
@@ -79,7 +79,7 @@ namespace TomCatRunner.Common
                 var obj = _pool.Dequeue();
                 if (obj != null)
                 {
-                    Object.Destroy(obj.gameObject);
+                    UnityEngine.Object.Destroy(obj.gameObject);
                 }
             }
             CountActive = 0;
@@ -130,7 +130,7 @@ namespace TomCatRunner.Common
 
         private GameObject CreateInstance()
         {
-            var obj = Object.Instantiate(_prefab, _parent);
+            var obj = UnityEngine.Object.Instantiate(_prefab, _parent);
             obj.SetActive(false);
             return obj;
         }
@@ -170,7 +170,7 @@ namespace TomCatRunner.Common
                 var obj = _pool.Dequeue();
                 if (obj != null)
                 {
-                    Object.Destroy(obj);
+                    UnityEngine.Object.Destroy(obj);
                 }
             }
             CountActive = 0;

@@ -1,0 +1,508 @@
+{
+  "comment": "TomCatRunner compile manifest - defines every assembly in dependency order. Sources are glob patterns relative to repo root. References: 'engine' = all UnityEngine module DLLs, 'engine-editor' = + UnityEditor DLLs, otherwise assembly names (compiled earlier) or explicit DLL paths.",
+  "assemblies": [
+    {
+      "name": "Unity.Mathematics",
+      "sources": [
+        "refs/packages/com.unity.mathematics/package/Unity.Mathematics/**/*.cs"
+      ],
+      "exclude": [
+        "**/Tests/**",
+        "**/Editor/**"
+      ],
+      "references": [
+        "engine"
+      ],
+      "defines": [],
+      "unsafe": true
+    },
+    {
+      "name": "Unity.Burst",
+      "sources": [
+        "refs/packages/com.unity.burst/package/Runtime/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine",
+        "refs/packages/com.unity.burst/package/Unity.Burst.Unsafe.dll"
+      ],
+      "defines": [],
+      "unsafe": true
+    },
+    {
+      "name": "UnityEngine.UI",
+      "sources": [
+        "refs/packages/com.unity.ugui/Runtime/**/*.cs"
+      ],
+      "exclude": [
+        "**/Properties/**"
+      ],
+      "references": [
+        "engine"
+      ],
+      "defines": [
+        "PACKAGE_PHYSICS",
+        "PACKAGE_PHYSICS2D",
+        "PACKAGE_TILEMAP",
+        "PACKAGE_ANIMATION",
+        "PACKAGE_UITOOLKIT"
+      ],
+      "unsafe": false
+    },
+    {
+      "name": "UniRx",
+      "sources": [
+        "refs/packages/com.neuecc.unirx/UniRx-7.1.0/Assets/Plugins/UniRx/Scripts/**/*.cs"
+      ],
+      "exclude": [
+        "**/Editor/**"
+      ],
+      "references": [
+        "engine",
+        "UnityEngine.UI"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "UniTask",
+      "sources": [
+        "refs/packages/com.cysharp.unitask/UniTask-2.5.11/src/UniTask/Assets/Plugins/UniTask/Runtime/**/*.cs"
+      ],
+      "exclude": [
+        "**/External/**",
+        "**/Linq/**",
+        "**/Editor/**"
+      ],
+      "references": [
+        "engine",
+        "UnityEngine.UI"
+      ],
+      "defines": [
+        "UNITASK_ASSETBUNDLE_SUPPORT",
+        "UNITASK_PHYSICS_SUPPORT",
+        "UNITASK_PHYSICS2D_SUPPORT",
+        "UNITASK_PARTICLESYSTEM_SUPPORT",
+        "UNITASK_UGUI_SUPPORT",
+        "UNITASK_WEBREQUEST_SUPPORT"
+      ],
+      "unsafe": false
+    },
+    {
+      "name": "VContainer",
+      "sources": [
+        "refs/packages/com.hadashikick.vcontainer/VContainer-1.19.0/VContainer/Assets/VContainer/Runtime/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine",
+        "UniTask"
+      ],
+      "defines": [
+        "VCONTAINER_UNITASK_INTEGRATION"
+      ],
+      "unsafe": true
+    },
+    {
+      "name": "UnityEditor.UI",
+      "sources": [
+        "refs/packages/com.unity.ugui/Editor/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "UnityEngine.UI"
+      ],
+      "defines": [
+        "PACKAGE_PHYSICS",
+        "PACKAGE_PHYSICS2D",
+        "PACKAGE_TILEMAP",
+        "PACKAGE_ANIMATION",
+        "PACKAGE_UITOOLKIT"
+      ],
+      "unsafe": false
+    },
+    {
+      "name": "Unity.TextMeshPro",
+      "sources": [
+        "refs/packages/com.unity.textmeshpro/package/Scripts/Runtime/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine",
+        "UnityEngine.UI"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "Unity.TextMeshPro.Editor",
+      "sources": [
+        "refs/packages/com.unity.textmeshpro/package/Scripts/Editor/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "UnityEditor.UI"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "DOTween.Modules",
+      "sources": [
+        "Assets/_Project/ThirdParty/DOTweenModules/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Assets/Plugins/DOTween/DOTween.dll"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "Unity.ResourceManager",
+      "sources": [
+        "refs/packages/com.unity.addressables/package/Runtime/ResourceManager/**/*.cs"
+      ],
+      "exclude": [
+        "**/Editor/**"
+      ],
+      "references": [
+        "engine",
+        "refs/packages/com.unity.nuget.newtonsoft-json/package/Runtime/Newtonsoft.Json.dll"
+      ],
+      "defines": [],
+      "unsafe": true
+    },
+    {
+      "name": "Unity.Addressables",
+      "sources": [
+        "refs/packages/com.unity.addressables/package/Runtime/**/*.cs"
+      ],
+      "exclude": [
+        "**/ResourceManager/**",
+        "**/Editor/**"
+      ],
+      "references": [
+        "engine",
+        "Unity.ResourceManager",
+        "refs/packages/com.unity.nuget.newtonsoft-json/package/Runtime/Newtonsoft.Json.dll"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "Unity.ScriptableBuildPipeline",
+      "sources": [
+        "refs/packages/com.unity.scriptablebuildpipeline/package/Runtime/**/*.cs"
+      ],
+      "exclude": [
+        "**/Tests/**"
+      ],
+      "references": [
+        "engine"
+      ],
+      "defines": [
+        "NONRECURSIVE_DEPENDENCY_DATA"
+      ],
+      "unsafe": false
+    },
+    {
+      "name": "Unity.ScriptableBuildPipeline.Editor",
+      "sources": [
+        "refs/packages/com.unity.scriptablebuildpipeline/package/Editor/**/*.cs"
+      ],
+      "exclude": [
+        "**/Tests/**"
+      ],
+      "references": [
+        "engine-editor",
+        "Unity.ScriptableBuildPipeline"
+      ],
+      "defines": [
+        "NONRECURSIVE_DEPENDENCY_DATA"
+      ],
+      "unsafe": true
+    },
+    {
+      "name": "Unity.Addressables.Editor",
+      "sources": [
+        "refs/packages/com.unity.addressables/package/Editor/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "Unity.ScriptableBuildPipeline",
+        "Unity.ScriptableBuildPipeline.Editor",
+        "refs/packages/com.unity.nuget.newtonsoft-json/package/Runtime/Newtonsoft.Json.dll"
+      ],
+      "defines": [
+        "NONRECURSIVE_DEPENDENCY_DATA"
+      ],
+      "unsafe": false
+    },
+    {
+      "name": "UnityEngine.TestRunner",
+      "sources": [
+        "refs/packages/com.unity.test-framework/package/UnityEngine.TestRunner/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine",
+        "refs/packages/com.unity.ext.nunit/package/net35/unity-custom/nunit.framework.dll"
+      ],
+      "defines": [],
+      "unsafe": true
+    },
+    {
+      "name": "UnityEditor.TestRunner",
+      "sources": [
+        "refs/packages/com.unity.test-framework/package/UnityEditor.TestRunner/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "UnityEngine.TestRunner",
+        "refs/packages/com.unity.ext.nunit/package/net35/unity-custom/nunit.framework.dll",
+        "refs/unity/Editor/Data/Managed/Unity.Cecil.dll",
+        "refs/unity/Editor/Data/Managed/Unity.Cecil.Mdb.dll",
+        "refs/unity/Editor/Data/Managed/Unity.Cecil.Pdb.dll",
+        "refs/unity/Editor/Data/Managed/Unity.Cecil.Rocks.dll"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "TomCatRunner.Common.Runtime",
+      "sources": [
+        "Assets/_Project/Common/Scripts/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "UniRx",
+        "UniTask",
+        "Unity.Addressables",
+        "Unity.ResourceManager"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "TomCatRunner.Core.Runtime",
+      "sources": [
+        "Assets/_Project/Core/Runtime/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "UniRx",
+        "UniTask",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "VContainer"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "TomCatRunner.UI.Runtime",
+      "sources": [
+        "Assets/_Project/UI/Scripts/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "UniRx",
+        "UniTask",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "DOTween.Modules",
+        "Assets/Plugins/DOTween/DOTween.dll"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "TomCatRunner.Seasons.Runtime",
+      "sources": [
+        "Assets/_Project/Seasons/Scripts/Runtime/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "UniTask",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "DOTween.Modules",
+        "Assets/Plugins/DOTween/DOTween.dll"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "TomCatRunner.Seasons.UI",
+      "sources": [
+        "Assets/_Project/Seasons/Scripts/UI/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "UniRx",
+        "UniTask",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "DOTween.Modules",
+        "Assets/Plugins/DOTween/DOTween.dll"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "TomCatRunner.Game",
+      "sources": [
+        "Assets/_Project/Composition/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "VContainer",
+        "UniTask",
+        "TomCatRunner.Seasons.UI"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "TomCatRunner.Seasons.Editor",
+      "sources": [
+        "Assets/_Project/Seasons/Scripts/Editor/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor",
+        "UnityEditor.UI",
+        "TomCatRunner.Seasons.UI"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "Assembly-CSharp",
+      "sources": [
+        "Assets/_Project/Resources/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "TomCatRunner.Game",
+        "UniRx",
+        "UniTask",
+        "VContainer",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Unity.Addressables",
+        "DOTween.Modules",
+        "TomCatRunner.Seasons.UI",
+        "Assets/Plugins/DOTween/DOTween.dll"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "Assembly-CSharp-Editor",
+      "sources": [
+        "Assets/_Project/Editor/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "TomCatRunner.Seasons.Editor",
+        "TomCatRunner.Game",
+        "UniRx",
+        "UniTask",
+        "VContainer",
+        "UnityEngine.UI",
+        "UnityEditor.UI",
+        "Unity.TextMeshPro",
+        "Unity.TextMeshPro.Editor",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor",
+        "Unity.ScriptableBuildPipeline.Editor",
+        "DOTween.Modules",
+        "Assets/Plugins/DOTween/Editor/DOTweenEditor.dll",
+        "TomCatRunner.Seasons.UI",
+        "Assets/Plugins/DOTween/DOTween.dll"
+      ],
+      "defines": [],
+      "unsafe": false
+    },
+    {
+      "name": "TomCatRunner.Tests",
+      "sources": [
+        "Assets/_Project/Tests/**/*.cs"
+      ],
+      "exclude": [],
+      "references": [
+        "engine-editor",
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "TomCatRunner.Seasons.Runtime",
+        "TomCatRunner.Game",
+        "UniRx",
+        "UniTask",
+        "VContainer",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Unity.Addressables",
+        "Unity.Burst",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "DOTween.Modules",
+        "refs/packages/com.unity.ext.nunit/package/net35/unity-custom/nunit.framework.dll",
+        "TomCatRunner.Seasons.UI",
+        "Assets/Plugins/DOTween/DOTween.dll",
+        "Unity.Mathematics"
+      ],
+      "defines": [],
+      "unsafe": false
+    }
+  ]
+}

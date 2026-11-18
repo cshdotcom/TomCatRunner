@@ -1,18 +1,18 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEngine;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
 using UnityEditor.AddressableAssets.Settings.GroupSchemas;
-using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace TomCatRunner.Seasons.Editor
 {
     /// <summary>
-    /// Addressables 组配置与构建脚本
-    /// 划分组：Season_Core / Season_Phase_N / Shared_Base / UI_Screens / Audio_Music
+    /// Addressables 分组配置工具 - 建立赛季/共享/UI/音频/白模资源分组
+    /// 菜单: TomCatRunner > Addressables
     /// </summary>
     public static class AddressablesSetup
     {
@@ -21,127 +21,78 @@ namespace TomCatRunner.Seasons.Editor
         [MenuItem("TomCatRunner/Addressables/Configure Groups", false, 100)]
         public static void ConfigureAddressableGroups()
         {
-            var settings = GetOrCreateSettings();
-            if (settings == null) return;
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null)
+            {
+                Debug.LogError("[AddressablesSetup] AddressableAssetSettings not found. " +
+                               "Open Window > Asset Management > Addressables > Groups and create settings first.");
+                return;
+            }
 
-            // 定义组配置
+            // 组配置：名称 / 标签 / 是否静态内容 / 收录目录
             var groupConfigs = new[]
             {
                 new GroupConfig
                 {
                     name = "Season_Core",
                     labels = new[] { "season", "core", "runtime" },
-                    schema = new ContentUpdateGroupSchema
-                    {
-                        StaticContent = false,
-                        BuildPath = new BuildPath { Path = "Season_Core" },
-                        LoadPath = new LoadPath { Path = "Season_Core" }
-                    },
-                    bundles = new BundleNamingPolicy { BundleNaming = BundleNamingPolicy.BundleNamingMode.ByFolder },
+                    staticContent = false,
                     includes = new[] { "Assets/_Project/Seasons/Configs", "Assets/_Project/Seasons/Data" }
                 },
                 new GroupConfig
                 {
                     name = "Season_Phase_0",
                     labels = new[] { "season", "phase0", "neon_cyber" },
-                    schema = new ContentUpdateGroupSchema
-                    {
-                        StaticContent = false,
-                        BuildPath = new BuildPath { Path = "Season_Phase_0" },
-                        LoadPath = new LoadPath { Path = "Season_Phase_0" }
-                    },
-                    bundles = new BundleNamingPolicy { BundleNaming = BundleNamingPolicy.BundleNamingMode.ByFolder },
+                    staticContent = false,
                     includes = new[] { "Assets/_Project/Seasons/Art/Phases/Phase0" }
                 },
                 new GroupConfig
                 {
                     name = "Season_Phase_1",
                     labels = new[] { "season", "phase1", "cyberpunk" },
-                    schema = new ContentUpdateGroupSchema
-                    {
-                        StaticContent = false,
-                        BuildPath = new BuildPath { Path = "Season_Phase_1" },
-                        LoadPath = new LoadPath { Path = "Season_Phase_1" }
-                    },
-                    bundles = new BundleNamingPolicy { BundleNaming = BundleNamingPolicy.BundleNamingMode.ByFolder },
+                    staticContent = false,
                     includes = new[] { "Assets/_Project/Seasons/Art/Phases/Phase1" }
                 },
                 new GroupConfig
                 {
                     name = "Season_Phase_2",
                     labels = new[] { "season", "phase2", "void_darkness" },
-                    schema = new ContentUpdateGroupSchema
-                    {
-                        StaticContent = false,
-                        BuildPath = new BuildPath { Path = "Season_Phase_2" },
-                        LoadPath = new LoadPath { Path = "Season_Phase_2" }
-                    },
-                    bundles = new BundleNamingPolicy { BundleNaming = BundleNamingPolicy.BundleNamingMode.ByFolder },
+                    staticContent = false,
                     includes = new[] { "Assets/_Project/Seasons/Art/Phases/Phase2" }
                 },
                 new GroupConfig
                 {
                     name = "Season_Phase_3",
                     labels = new[] { "season", "phase3", "ultimate_rainbow" },
-                    schema = new ContentUpdateGroupSchema
-                    {
-                        StaticContent = false,
-                        BuildPath = new BuildPath { Path = "Season_Phase_3" },
-                        LoadPath = new LoadPath { Path = "Season_Phase_3" }
-                    },
-                    bundles = new BundleNamingPolicy { BundleNaming = BundleNamingPolicy.BundleNamingMode.ByFolder },
+                    staticContent = false,
                     includes = new[] { "Assets/_Project/Seasons/Art/Phases/Phase3" }
                 },
                 new GroupConfig
                 {
                     name = "Shared_Base",
                     labels = new[] { "shared", "base", "common" },
-                    schema = new ContentUpdateGroupSchema
-                    {
-                        StaticContent = true,  // 基础资源不频繁更新
-                        BuildPath = new BuildPath { Path = "Shared_Base" },
-                        LoadPath = new LoadPath { Path = "Shared_Base" }
-                    },
-                    bundles = new BundleNamingPolicy { BundleNaming = BundleNamingPolicy.BundleNamingMode.ByFolder },
+                    staticContent = true,   // 基础资源不频繁更新
                     includes = new[] { "Assets/_Project/Common/Art", "Assets/_Project/Core/Art" }
                 },
                 new GroupConfig
                 {
                     name = "UI_Screens",
                     labels = new[] { "ui", "screens", "runtime" },
-                    schema = new ContentUpdateGroupSchema
-                    {
-                        StaticContent = false,
-                        BuildPath = new BuildPath { Path = "UI_Screens" },
-                        LoadPath = new LoadPath { Path = "UI_Screens" }
-                    },
-                    bundles = new BundleNamingPolicy { BundleNaming = BundleNamingPolicy.BundleNamingMode.ByFolder },
+                    staticContent = false,
                     includes = new[] { "Assets/_Project/UI/Prefabs/Screens", "Assets/_Project/UI/Shaders" }
                 },
                 new GroupConfig
                 {
                     name = "Audio_Music",
                     labels = new[] { "audio", "music", "runtime" },
-                    schema = new ContentUpdateGroupSchema
-                    {
-                        StaticContent = true,
-                        BuildPath = new BuildPath { Path = "Audio_Music" },
-                        LoadPath = new LoadPath { Path = "Audio_Music" }
-                    },
-                    bundles = new BundleNamingPolicy { BundleNaming = BundleNamingPolicy.BundleNamingMode.ByFolder },
+                    staticContent = true,
                     includes = new[] { "Assets/_Project/Audio/Music", "Assets/_Project/Audio/SFX" }
                 },
                 new GroupConfig
                 {
                     name = "Chunks_Whitebox",
                     labels = new[] { "chunks", "whitebox", "testing" },
-                    schema = new ContentUpdateGroupSchema
-                    {
-                        StaticContent = true,
-                        BuildPath = new BuildPath { Path = "Chunks_Whitebox" },
-                        LoadPath = new LoadPath { Path = "Chunks_Whitebox" }
-                    },
-                    bundles = new BundleNamingPolicy { BundleNaming = BundleNamingPolicy.BundleNamingMode.ByFolder },
+                    staticContent = true,
                     includes = new[] { "Assets/_Project/Seasons/Prefabs/Chunks/Whitebox" }
                 }
             };
@@ -151,206 +102,209 @@ namespace TomCatRunner.Seasons.Editor
                 CreateOrUpdateGroup(settings, config);
             }
 
-            // 设置默认组
+            // 移除未使用的默认空组
             var defaultGroup = settings.DefaultGroup;
-            if (defaultGroup != null && defaultGroup.Name == "Default Local Group")
+            if (defaultGroup != null && defaultGroup.Name == "Default Local Group"
+                && defaultGroup.entries.Count == 0)
             {
                 settings.RemoveGroup(defaultGroup);
             }
 
-            EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
-            Debug.Log("[AddressablesSetup] Groups configured successfully");
-        }
-
-        private static AddressableAssetSettings GetOrCreateSettings()
-        {
-            var settings = AddressableAssetSettingsDefaultObject.Settings;
-            if (settings == null)
-            {
-                var dir = Path.GetDirectoryName(SETTINGS_PATH);
-                if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                settings = AddressableAssetSettings.Create(SETTINGS_PATH, "AddressableAssetSettings", true, true);
-                Debug.Log($"[AddressablesSetup] Created new settings at {SETTINGS_PATH}");
-            }
-            return settings;
+            Debug.Log($"[AddressablesSetup] Configured {groupConfigs.Length} addressable groups.");
         }
 
         private static void CreateOrUpdateGroup(AddressableAssetSettings settings, GroupConfig config)
         {
-            var group = settings.FindGroup(config.name);
+            var group = settings.groups.FirstOrDefault(g => g != null && g.Name == config.name);
             if (group == null)
             {
-                group = settings.CreateGroup(config.name, false, false, false, null, typeof(ContentUpdateGroupSchema), typeof(BundledAssetGroupSchema));
+                group = settings.CreateGroup(config.name, false, false, false, null,
+                    typeof(BundledAssetGroupSchema), typeof(ContentUpdateGroupSchema));
                 Debug.Log($"[AddressablesSetup] Created group: {config.name}");
             }
 
-            // 配置 Schema
-            var contentSchema = group.GetSchema<ContentUpdateGroupSchema>();
-            if (contentSchema != null && config.schema != null)
+            // Bundled 路径策略：静态内容走远端可更新路径，动态内容走本地路径
+            var bundled = group.GetSchema<BundledAssetGroupSchema>();
+            if (bundled != null)
             {
-                contentSchema.StaticContent = config.schema.StaticContent;
+                bundled.BuildPath.SetVariableByName(settings,
+                    config.staticContent ? "RemoteBuildPath" : "LocalBuildPath");
+                bundled.LoadPath.SetVariableByName(settings,
+                    config.staticContent ? "RemoteLoadPath" : "LocalLoadPath");
+                bundled.BundleNaming = BundledAssetGroupSchema.BundleNamingStyle.NoHash;
+                bundled.Compression = BundledAssetGroupSchema.BundleCompressionMode.LZ4;
             }
 
-            var bundleSchema = group.GetSchema<BundledAssetGroupSchema>();
-            if (bundleSchema != null && config.bundles != null)
+            var contentUpdate = group.GetSchema<ContentUpdateGroupSchema>();
+            if (contentUpdate != null)
             {
-                bundleSchema.BundleNaming = config.bundles.BundleNaming;
+                contentUpdate.StaticContent = config.staticContent;
             }
 
-            // 添加标签
             foreach (var label in config.labels)
             {
                 if (!settings.GetLabels().Contains(label))
                 {
                     settings.AddLabel(label);
                 }
-                group.SetLabel(label, true, true);
             }
 
-            // 添加资源路径
-            if (config.includes != null)
+            foreach (var directory in config.includes)
             {
-                foreach (var includePath in config.includes)
-                {
-                    AddDirectoryToGroup(settings, group, includePath, config.labels);
-                }
+                AddDirectoryToGroup(settings, group, directory, config.labels);
             }
-
-            EditorUtility.SetDirty(group);
         }
 
-        private static void AddDirectoryToGroup(AddressableAssetSettings settings, AddressableAssetGroup group, string directoryPath, string[] labels)
+        private static void AddDirectoryToGroup(AddressableAssetSettings settings,
+            AddressableAssetGroup group, string directoryPath, string[] labels)
         {
             if (!Directory.Exists(directoryPath))
             {
-                Directory.CreateDirectory(directoryPath);
-                AssetDatabase.Refresh();
+                return; // 目录尚不存在时静默跳过
             }
 
-            var guids = AssetDatabase.FindAssets("", new[] { directoryPath });
+            var guids = AssetDatabase.FindAssets(string.Empty, new[] { directoryPath });
+            int added = 0;
+
             foreach (var guid in guids)
             {
                 var assetPath = AssetDatabase.GUIDToAssetPath(guid);
-                var entry = settings.CreateOrMoveEntry(guid, group);
-                entry.address = assetPath.Replace("Assets/", "");
-                entry.SetLabels(labels, true, true);
+                if (!File.Exists(assetPath))
+                {
+                    continue; // 跳过文件夹
+                }
+
+                var entry = settings.CreateOrMoveEntry(guid, group, readOnly: false, postEvent: false);
+                foreach (var label in labels)
+                {
+                    entry.SetLabel(label, true);
+                }
+                added++;
+            }
+
+            if (added > 0)
+            {
+                Debug.Log($"[AddressablesSetup] {group.Name}: +{added} assets from {directoryPath}");
             }
         }
 
         [MenuItem("TomCatRunner/Addressables/Build Player Content", false, 200)]
         public static void BuildPlayerContent()
         {
-            var settings = GetOrCreateSettings();
-            if (settings == null) return;
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null)
+            {
+                Debug.LogError("[AddressablesSetup] AddressableAssetSettings not found.");
+                return;
+            }
+
+            var processor = new AddressablesBuildProcessor();
+            processor.OnPreBuild();
 
             AddressableAssetSettings.BuildPlayerContent();
-            Debug.Log("[AddressablesSetup] Build completed");
+            Debug.Log("[AddressablesSetup] Player content built.");
+
+            processor.OnPostBuild(settings);
         }
 
         [MenuItem("TomCatRunner/Addressables/Clean Build Cache", false, 201)]
         public static void CleanBuildCache()
         {
-            var buildPath = Path.Combine(Application.dataPath, "../Library/com.unity.addressables/aa/BuildCache");
-            if (Directory.Exists(buildPath))
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null)
             {
-                Directory.Delete(buildPath, true);
-                Debug.Log("[AddressablesSetup] Build cache cleaned");
+                Debug.LogError("[AddressablesSetup] AddressableAssetSettings not found.");
+                return;
             }
+
+            // 1.22.x 无内置 CleanBuildCache API，直接删除构建缓存目录
+            string cacheDir = Path.Combine("Library", "com.unity.addressables");
+            if (Directory.Exists(cacheDir))
+            {
+                Directory.Delete(cacheDir, true);
+                File.Delete(cacheDir + ".meta");
+            }
+            Debug.Log("[AddressablesSetup] Addressables build cache cleaned.");
         }
 
         [MenuItem("TomCatRunner/Addressables/Generate Catalog Version", false, 202)]
         public static void GenerateCatalogVersion()
         {
-            var settings = GetOrCreateSettings();
-            if (settings == null) return;
-
-            var version = PlayerSettings.applicationVersion + "." + PlayerSettings.Android.bundleVersionCode;
-            var catalogPath = Path.Combine("Assets/StreamingAssets/aa", settings.ProfileSettings.GetValueByName(settings.activeProfileId, "Remote.BuildPath"));
-
-            // 生成版本文件
-            var versionData = new CatalogVersionData
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null)
             {
-                version = version,
-                timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                catalogUrl = settings.ProfileSettings.GetValueByName(settings.activeProfileId, "Remote.LoadPath") + "/catalog.json"
-            };
+                Debug.LogError("[AddressablesSetup] AddressableAssetSettings not found.");
+                return;
+            }
 
-            var json = JsonUtility.ToJson(versionData, true);
-            var versionFilePath = Path.Combine(Application.streamingAssetsPath, "aa/catalog_version.json");
-            Directory.CreateDirectory(Path.GetDirectoryName(versionFilePath));
-            File.WriteAllText(versionFilePath, json);
-
-            AssetDatabase.Refresh();
-            Debug.Log($"[AddressablesSetup] Catalog version generated: {version}");
+            var processor = new AddressablesBuildProcessor();
+            processor.OnPostBuild(settings);
+            Debug.Log("[AddressablesSetup] Catalog version regenerated.");
         }
 
+        /// <summary>
+        /// 分组描述
+        /// </summary>
+        [Serializable]
         private class GroupConfig
         {
             public string name;
             public string[] labels;
-            public ContentUpdateGroupSchema schema;
-            public BundledAssetGroupSchema bundles;
+            public bool staticContent;
             public string[] includes;
-        }
-
-        [System.Serializable]
-        private class CatalogVersionData
-        {
-            public string version;
-            public long timestamp;
-            public string catalogUrl;
         }
     }
 
     /// <summary>
-    /// Addressables 构建后处理 - 生成版本清单、压缩、上传准备
+    /// Addressables 构建后处理工具 - 生成版本清单、压缩、上传准备
+    /// （由 CIBuildScript / 菜单在 Addressables 构建完成后手动调用）
     /// </summary>
-    public class AddressablesBuildProcessor : UnityEditor.AddressableAssets.Build.IBuildProcessor
+    public class AddressablesBuildProcessor
     {
-        public int Order => 0;
-
-        public void OnPreBuild(UnityEditor.AddressableAssets.Build.AddressablesBuildContext context)
+        public void OnPreBuild()
         {
             Debug.Log("[AddressablesBuildProcessor] Pre-build: Generating version info");
         }
 
-        public void OnPostBuild(UnityEditor.AddressableAssets.Build.AddressablesBuildContext context)
+        public void OnPostBuild(AddressableAssetSettings settings)
         {
-            if (context.Result.Error != null)
-            {
-                Debug.LogError($"[AddressablesBuildProcessor] Build failed: {context.Result.Error}");
-                return;
-            }
-
-            GenerateVersionManifest(context);
-            CompressBundles(context);
+            GenerateVersionManifest(settings);
+            CompressBundles(settings);
             Debug.Log("[AddressablesBuildProcessor] Post-build processing completed");
         }
 
-        private void GenerateVersionManifest(UnityEditor.AddressableAssets.Build.AddressablesBuildContext context)
+        private void GenerateVersionManifest(AddressableAssetSettings settings)
         {
             var manifest = new BundleManifest
             {
-                version = PlayerSettings.applicationVersion,
+                version = PlayerSettings.bundleVersion,
                 buildNumber = PlayerSettings.Android.bundleVersionCode,
                 timestamp = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                 bundles = new List<BundleInfo>()
             };
 
-            foreach (var bundle in context.Result.BundleInfos)
+            // 汇总各分组的 bundle 命名信息（哈希在 bundle 构建产物中，由远端 catalog.json 提供）
+            foreach (var group in settings.groups)
             {
+                if (group == null) continue;
+                var schema = group.GetSchema<BundledAssetGroupSchema>();
+                if (schema == null) continue;
+
                 manifest.bundles.Add(new BundleInfo
                 {
-                    name = bundle.Key,
-                    hash = bundle.Value.Hash,
-                    size = bundle.Value.FileSize,
-                    crc = bundle.Value.Crc,
-                    labels = bundle.Value.Labels.ToList()
+                    name = $"{group.name}.bundle",
+                    hash = "",
+                    size = 0,
+                    crc = 0,
+                    labels = group.entries.SelectMany(e => e.labels).Distinct().ToList()
                 });
             }
 
-            var outputPath = Path.Combine(context.Settings.RemoteCatalogBuildPath, "bundle_manifest.json");
+            string buildPath = ResolveRemoteBuildPath(settings);
+            if (string.IsNullOrEmpty(buildPath)) buildPath = "Library/com.unity.addressables";
+
+            var outputPath = Path.Combine(buildPath, "bundle_manifest.json");
             Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
             File.WriteAllText(outputPath, JsonUtility.ToJson(manifest, true));
 
@@ -362,10 +316,12 @@ namespace TomCatRunner.Seasons.Editor
             AssetDatabase.Refresh();
         }
 
-        private void CompressBundles(UnityEditor.AddressableAssets.Build.AddressablesBuildContext context)
+        private void CompressBundles(AddressableAssetSettings settings)
         {
             // 可选：启用 Brotli/Gzip 压缩
-            var buildPath = context.Settings.RemoteCatalogBuildPath;
+            string buildPath = ResolveRemoteBuildPath(settings);
+            if (string.IsNullOrEmpty(buildPath) || !Directory.Exists(buildPath)) return;
+
             var files = Directory.GetFiles(buildPath, "*.bundle", SearchOption.AllDirectories);
 
             foreach (var file in files)
@@ -375,7 +331,19 @@ namespace TomCatRunner.Seasons.Editor
             }
         }
 
-        [System.Serializable]
+        private static string ResolveRemoteBuildPath(AddressableAssetSettings settings)
+        {
+            try
+            {
+                return settings.RemoteCatalogBuildPath.GetValue(settings);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        [Serializable]
         private class BundleManifest
         {
             public string version;
@@ -384,7 +352,7 @@ namespace TomCatRunner.Seasons.Editor
             public List<BundleInfo> bundles;
         }
 
-        [System.Serializable]
+        [Serializable]
         private class BundleInfo
         {
             public string name;

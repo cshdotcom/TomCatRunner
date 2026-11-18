@@ -5,7 +5,9 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Cysharp.Threading.Tasks;
 using VContainer;
+using VContainer.Unity;
 using TomCatRunner.Core.Data;
+using TomCatRunner.Core.Generation;
 
 namespace TomCatRunner.Core.Level
 {
@@ -330,7 +332,7 @@ namespace TomCatRunner.Core.Level
 
                 var instance = new ChunkInstance();
                 // 临时数据用于初始化
-                var tempData = new ChunkData { Type = type, StartZ = 0, EndZ = 100 };
+                var tempData = new ChunkData(type, 0f, 100f);
                 instance.Initialize(tempData, go);
                 pool.Enqueue(instance);
             }

@@ -51,5 +51,10 @@ Temp/
 *.temp
 
 # Package cache
-Packages/
 *.manifest
+
+# CI reference assemblies (downloaded by ci/fetch_refs.py, cached by Actions)
+refs/
+
+# Local tools
+tools/

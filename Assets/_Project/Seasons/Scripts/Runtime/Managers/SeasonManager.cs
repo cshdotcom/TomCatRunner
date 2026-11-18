@@ -151,18 +151,21 @@ namespace TomCatRunner.Seasons
             try
             {
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-                var request = await UnityEngine.Networking.UnityWebRequest.Get("https://worldtimeapi.org/api/ip").SendWebRequest();
-                stopwatch.Stop();
+                using (var webRequest = UnityEngine.Networking.UnityWebRequest.Get("https://worldtimeapi.org/api/ip"))
+                {
+                    await webRequest.SendWebRequest();
+                    stopwatch.Stop();
 
-                if (request.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
-                {
-                    var response = JsonUtility.FromJson<TimeApiResponse>(request.downloadHandler.text);
-                    _serverTimeUtc = DateTime.Parse(response.utc_datetime).ToUniversalTime();
-                    _localTimeOffset = (float)(stopwatch.ElapsedMilliseconds / 2.0);
-                }
-                else
-                {
-                    throw new Exception(request.error);
+                    if (webRequest.result == UnityEngine.Networking.UnityWebRequest.Result.Success)
+                    {
+                        var response = JsonUtility.FromJson<TimeApiResponse>(webRequest.downloadHandler.text);
+                        _serverTimeUtc = DateTime.Parse(response.utc_datetime).ToUniversalTime();
+                        _localTimeOffset = (float)(stopwatch.ElapsedMilliseconds / 2.0);
+                    }
+                    else
+                    {
+                        throw new Exception(webRequest.error);
+                    }
                 }
             }
             catch
@@ -179,7 +182,7 @@ namespace TomCatRunner.Seasons
             if (_useMockServer)
             {
                 // 生成模拟数据
-                _runtimeData = MockServer.GenerateRuntimeData(_currentConfig.seasonId);
+                _runtimeData = MockDataGenerator.GenerateRuntimeData(_currentConfig.seasonId);
                 OnRuntimeDataUpdated?.Invoke(_runtimeData);
                 return;
             }
@@ -238,27 +241,21 @@ namespace TomCatRunner.Seasons
 
                 if (!_isInitialized) continue;
 
-                try
-                {
-                    // 同步时间
-                    var oldServerTime = _serverTimeUtc;
-                    var syncTask = SyncServerTimeAsync();
-                    yield return new WaitUntil(() => syncTask.IsCompleted);
+                // SyncServerTimeAsync / InitializeRuntimeDataAsync 内部已捕获异常，
+                // 这里不能再用 try-catch 包裹（C# 禁止在带 catch 的 try 中 yield）
+                var oldServerTime = _serverTimeUtc;
+                var syncTask = SyncServerTimeAsync();
+                yield return new WaitUntil(() => syncTask.Status.IsCompleted());
 
-                    // 检查时间是否有显著变化
-                    if (Math.Abs((_serverTimeUtc - oldServerTime).TotalSeconds) > _timeSyncToleranceMs / 1000f)
-                    {
-                        // 重新评估阶段
-                        UpdatePhaseAndTheme();
-
-                        // 同步运行时数据
-                        var dataTask = InitializeRuntimeDataAsync();
-                        yield return new WaitUntil(() => dataTask.IsCompleted);
-                    }
-                }
-                catch (Exception e)
+                // 检查时间是否有显著变化
+                if (Math.Abs((_serverTimeUtc - oldServerTime).TotalSeconds) > _timeSyncToleranceMs / 1000f)
                 {
-                    Debug.LogError($"[SeasonManager] Periodic sync error: {e}");
+                    // 重新评估阶段
+                    UpdatePhaseAndTheme();
+
+                    // 同步运行时数据
+                    var dataTask = InitializeRuntimeDataAsync();
+                    yield return new WaitUntil(() => dataTask.Status.IsCompleted());
                 }
             }
         }
@@ -293,7 +290,7 @@ namespace TomCatRunner.Seasons
             if (!CanClaimReward(tierLevel, track))
                 throw new InvalidOperationException("Cannot claim this reward");
 
-            var tier = _currentConfig.battlePassTable.tiers.Find(t => t.level == tierLevel);
+            var tier = Array.Find(_currentConfig.battlePassTable.tiers, t => t.level == tierLevel);
             if (tier == null) throw new ArgumentException($"Tier {tierLevel} not found");
 
             var reward = track == RewardTrack.Free ? tier.freeReward : tier.premiumReward;
@@ -393,6 +390,11 @@ namespace TomCatRunner.Seasons
         }
 
         /// <summary>
+        /// 获取当前活跃主题（与 ActiveTheme 同义，供 ViewModel 使用）
+        /// </summary>
+        public ThemeProfile GetCurrentThemeProfile() => _activeTheme;
+
+        /// <summary>
         /// 获取距离赛季结束的剩余时间
         /// </summary>
         public TimeSpan GetTimeUntilSeasonEnd()
@@ -438,7 +440,7 @@ namespace TomCatRunner.Seasons
         {
             if (_isInitialized)
             {
-                _ = SyncServerTimeAsync().ContinueWith(_ => UpdatePhaseAndTheme());
+                _ = SyncServerTimeAsync().ContinueWith(() => UpdatePhaseAndTheme());
                 _ = InitializeRuntimeDataAsync();
             }
         }
@@ -454,9 +456,11 @@ namespace TomCatRunner.Seasons
         }
     }
 
-    // ===================== Mock Server (用于离线测试) =====================
+    // ===================== Mock 数据生成（离线模式） =====================
+    // 完整的模拟服务器单例见 Managers/MockServer.cs（TomCatRunner.Seasons.MockServer），
+    // 这里仅保留无副作用的静态数据生成器，供 SeasonManager 离线初始化使用。
 
-    public static class MockServer
+    public static class MockDataGenerator
     {
         public static SeasonRuntimeData GenerateRuntimeData(int seasonId)
         {
@@ -464,7 +468,7 @@ namespace TomCatRunner.Seasons
             {
                 seasonId = seasonId,
                 currentPhase = SeasonPhase.Active,
-                serverTimeUtc = DateTime.UtcNow,
+                serverTimeUtc = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds(),
                 battlePassLevel = UnityEngine.Random.Range(1, 50),
                 battlePassXp = UnityEngine.Random.Range(0, 50000),
                 isPremiumUnlocked = UnityEngine.Random.value > 0.5f,
@@ -518,7 +522,7 @@ namespace TomCatRunner.Seasons
     }
 
     [Serializable]
-    private class TimeApiResponse
+    internal class TimeApiResponse
     {
         public string utc_datetime;
         public string timezone;

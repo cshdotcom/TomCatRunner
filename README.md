@@ -6,7 +6,7 @@
 [![URP](https://img.shields.io/badge/URP-14.x-57B9D3?logo=unity)](https://docs.unity3d.com/Packages/com.unity.render-pipelines.universal@14.0/manual/index.html)
 [![Addressables](https://img.shields.io/badge/Addressables-1.23+-57B9D3?logo=unity)](https://docs.unity3d.com/Packages/com.unity.addressables@1.23/manual/index.html)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/your-repo/ci.yml?branch=main)](https://github.com/your-repo/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/cshdotcom/TomCatRunner/unity-ci.yml?branch=master)](https://github.com/cshdotcom/TomCatRunner/actions)
 
 ---
 
@@ -269,43 +269,31 @@ public class SeasonConfig : ScriptableObject
 
 ## 📦 CI/CD 流程
 
-### GitHub Actions 工作流 (`.github/workflows/ci.yml`)
+### 无证编译管线（默认）
 
-```mermaid
-graph LR
-    A[Push/PR] --> B[Lint & Unit Tests]
-    B --> C[Build Windows]
-    B --> D[Build WebGL]
-    B --> E[Build Addressables]
-    B --> F[Performance Benchmarks]
-    C --> G[Prepare Release]
-    D --> G
-    E --> G
-    F --> G
-    G --> H[Create GitHub Release]
-    D --> I[Deploy to GitHub Pages]
+GitHub Actions 工作流 `.github/workflows/unity-ci.yml` 使用 **Roslyn + Unity 2022.3.62 官方引用程序集** 复现编辑器内编译，**无需 Unity 许可证**：
+
+```
+Push/PR/Tag ──> 结构校验 ──> 引用获取(缓存) ──> 全量编译 27 程序集 ──> 零错误门禁 ──> 产物上传
+                                          (tag v*) ──────────────────> GitHub Release
 ```
 
-### 触发条件
-| 事件 | 执行作业 |
-|------|----------|
-| Push to `main`/`develop` | 全流程（不含 Release） |
-| Pull Request | Lint + Tests |
-| Tag `v*` | 全流程 + Release 创建 |
-| Push to `main` (WebGL) | 自动部署到 GitHub Pages |
+| 组件 | 说明 |
+|------|------|
+| `ci/fetch_refs.py` | 下载 Unity 编辑器托管 DLL（并行分块、可断点续传）+ Unity/OpenUPM 包源码 |
+| `ci/assemblies.json` | 27 个程序集的编译清单（源码、引用、宏、顺序） |
+| `ci/compile.py` | 编译驱动：与 Unity 编辑器一致的宏/引用集（`UNITY_EDITOR`、`*_OR_NEWER` 等） |
+
+编译范围：引擎模块、uGUI、TextMeshPro、Addressables、Burst、UniRx、UniTask、VContainer、
+DOTween（含 UI 模块）、ScriptableBuildPipeline、TestRunner，以及全部项目代码
+（Common / Core / UI / Seasons / Game / Editor / Tests）。
+
+> 需要产出真正的玩家包（Windows/WebGL APK）时，用 Unity 打开工程走
+> `TomCatRunner > CI` 菜单（CIBuildScript），或在 Actions 配置 game-ci + 许可证。
 
 ### 版本号策略
-- **语义化版本**：`MAJOR.MINOR.PATCH`
-- **自动递增**：基于最新 `v*` tag 的 PATCH +1
-- **构建号**：GitHub Run Number 或日期编码
-- **格式示例**：`v1.2.3 (abc1234) - 2024-01-15`
-
-### Changelog 生成
-- 基于 [Conventional Commits](https://www.conventionalcommits.org/)
-- 分类：Features / Bug Fixes / Docs / Performance / Maintenance / UI / Tests
-- 自动关联 PR/Issue 编号
-
----
+- **语义化版本**：`MAJOR.MINOR.PATCH`，tag `v*` 触发 Release
+- **产物**：源码 zip + 全部编译 DLL zip
 
 ## 📊 性能指标
 

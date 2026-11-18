@@ -1,13 +1,20 @@
 {
-  "name": "TomCatRunner.UI.Runtime",
-  "references": [
-    "TomCatRunner.Common.Runtime"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": []
+    "name": "TomCatRunner.UI.Runtime",
+    "rootNamespace": "TomCatRunner.UI",
+    "references": [
+        "TomCatRunner.Common.Runtime",
+        "UniRx",
+        "UniTask",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

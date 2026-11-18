@@ -1,15 +1,23 @@
 {
-  "name": "TomCatRunner.Seasons.Runtime",
-  "references": [
-    "TomCatRunner.Core.Runtime",
-    "TomCatRunner.Common.Runtime",
-    "TomCatRunner.UI.Runtime"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": false,
-  "precompiledReferences": [],
-  "autoReferenced": true,
-  "defineConstraints": []
+    "name": "TomCatRunner.Seasons.Runtime",
+    "rootNamespace": "TomCatRunner.Seasons",
+    "references": [
+        "TomCatRunner.Common.Runtime",
+        "TomCatRunner.Core.Runtime",
+        "TomCatRunner.UI.Runtime",
+        "UniTask",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

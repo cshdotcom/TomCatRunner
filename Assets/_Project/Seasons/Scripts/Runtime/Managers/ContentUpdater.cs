@@ -98,7 +98,7 @@ namespace TomCatRunner.Seasons
             try
             {
                 // 获取远程目录
-                var catalogResult = await Addressables.CheckForCatalogUpdates(false).ToUniTask();
+                var catalogResult = await Addressables.CheckForCatalogUpdates(false).Task;
                 var hasCatalogUpdate = catalogResult.Count > 0;
 
                 // 检查特定标签的更新
@@ -107,7 +107,7 @@ namespace TomCatRunner.Seasons
 
                 foreach (var label in labelsToCheck)
                 {
-                    var sizeResult = await Addressables.GetDownloadSizeAsync(label).ToUniTask();
+                    var sizeResult = await Addressables.GetDownloadSizeAsync(label).Task;
                     if (sizeResult > 0)
                     {
                         _pendingLabels.Add(label);
@@ -210,7 +210,7 @@ namespace TomCatRunner.Seasons
             try
             {
                 var handle = Addressables.CheckForCatalogUpdates(true);
-                await handle.ToUniTask();
+                await handle.Task;
 
                 if (handle.Status == AsyncOperationStatus.Succeeded)
                 {
@@ -218,7 +218,7 @@ namespace TomCatRunner.Seasons
                     if (catalogs.Count > 0)
                     {
                         var updateHandle = Addressables.UpdateCatalogs(catalogs, false);
-                        await updateHandle.ToUniTask();
+                        await updateHandle.Task;
                         return updateHandle.Status == AsyncOperationStatus.Succeeded;
                     }
                 }
@@ -296,10 +296,10 @@ namespace TomCatRunner.Seasons
 
             try
             {
-                var cacheSize = Caching.currentCacheForWriting.spaceUsed;
+                var cacheSize = Caching.currentCacheForWriting.spaceOccupied;
                 if (cacheSize > _maxCacheSizeBytes)
                 {
-                    await Caching.ClearCacheAsync();
+                    Caching.ClearCache();
                     if (_debugLog) Debug.Log($"[ContentUpdater] Cache cleaned: {FormatBytes(cacheSize)}");
                 }
             }
@@ -331,7 +331,7 @@ namespace TomCatRunner.Seasons
 
             foreach (var label in labels)
             {
-                var size = await Addressables.GetDownloadSizeAsync(label).ToUniTask();
+                var size = await Addressables.GetDownloadSizeAsync(label).Task;
                 _totalDownloadSize += size;
             }
 
@@ -348,7 +348,7 @@ namespace TomCatRunner.Seasons
             foreach (var label in criticalLabels)
             {
                 var handle = Addressables.LoadAssetsAsync<GameObject>(label, null);
-                await handle.ToUniTask();
+                await handle.Task;
                 Addressables.Release(handle);
             }
 
@@ -387,7 +387,9 @@ namespace TomCatRunner.Seasons
             if (Directory.Exists(buildPath))
             {
                 CopyDirectory(buildPath, cdnPath);
-                AssetDatabase.Refresh();
+#if UNITY_EDITOR
+                UnityEditor.AssetDatabase.Refresh();
+#endif
                 Debug.Log($"[ContentUpdater] Build copied to Local CDN: {cdnPath}");
             }
         }

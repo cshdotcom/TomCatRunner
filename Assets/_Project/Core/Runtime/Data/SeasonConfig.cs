@@ -98,15 +98,5 @@ namespace TomCatRunner.Core.Data
         public int MilestoneIndex; // 第几个里程碑解锁
     }
 
-    public enum RewardType
-    {
-        Currency_Gold,
-        Currency_Gem,
-        Skin,
-        Emote,
-        Pet,
-        Consumable,
-        LootBox,
-        XP
-    }
+    // RewardType 统一定义在 BattlePassTable.cs（更完整的成员集）
 }
