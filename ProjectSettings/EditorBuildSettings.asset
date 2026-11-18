@@ -9,6 +9,18 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Project/Scenes/Boot.unity
+    guid: 82622e1e-664a-deab-1f4b-255c70b79b03
+    type: 1
+  - enabled: 1
+    path: Assets/_Project/Scenes/SeasonHub.unity
+    guid: fdc2dbfd-d402-4e80-5252-93330e950478
+    type: 1
+  - enabled: 1
+    path: Assets/_Project/Scenes/Gameplay.unity
+    guid: 9e0b759e-7e7a-ebd7-1931-22cb3d3dd469
+    type: 1
+  - enabled: 0
     path: Assets/_Project/Scenes/Main.unity
     guid: c1852da2-c9da-f8b6-9f91-58f968050fc8
     type: 1

@@ -187,6 +187,37 @@ python3 ci/compile.py      # Roslyn 全量编译 28 个程序集，零错误门�
 # 输出: Builds/Addressables/
 ```
 
+### 获取 Unity Personal License（免费）并启用 CI 自动构建
+
+Unity Personal License **完全免费**（年收入低于 20 万美元即可），是构建 Player（.exe / WebGL）的唯一前置条件。一次配置永久生效：
+
+1. **注册 Unity ID**：访问 https://id.unity.com 注册账号
+2. **本地激活 License 文件**：
+   - 下载安装 [Unity Hub](https://unity.com/download)
+   - Hub → Preferences → Licenses → Add → Get a free Personal license
+   - 激活成功后会在本地生成 `.ulf` 文件：
+     - Windows: `%PROGRAMDATA%\Unity\Unity_lic.ulf`
+     - macOS: `/Library/Application Support/Unity/Unity_lic.ulf`
+     - Linux: `~/.local/share/unity3d/Unity/Unity_lic.ulf`
+3. **配置 GitHub Secrets**（仓库 Settings → Secrets and variables → Actions → New repository secret）：
+   | Secret 名称 | 值 |
+   |---|---|
+   | `UNITY_EMAIL` | 你的 Unity ID 邮箱 |
+   | `UNITY_PASSWORD` | 你的 Unity ID 密码 |
+   | `UNITY_LICENSE` | `.ulf` 文件的完整 XML 内容（粘贴明文即可） |
+4. **添加 Repository Variable**（Settings → Secrets and variables → Actions → Variables → New repository variable）：
+   | Variable 名称 | 值 |
+   |---|---|
+   | `UNITY_LICENSE_CONFIGURED` | `true` |
+5. **手动触发 CI 构建**：
+   - 仓库 Actions 页 → 选择 "Unity CI/CD Pipeline" → Run workflow
+   - 或直接 `git tag v2.x.x && git push --tags`
+6. **构建产物**：
+   - Windows `.exe`、WebGL `.zip` 自动上传到 Release
+   - WebGL 版同时自动部署到 GitHub Pages：`https://cshdotcom.github.io/TomCatRunner/`
+
+> ⚠️ 未配置 License 时，`unity_build` / `deploy_pages` job 会自动跳过；`compile` job 用 Roslyn 编译全部 C# 程序集仍能正常通过，Release 仍会发布（仅含源码 + DLL）。
+
 ---
 
 ## 🎮 玩法操作

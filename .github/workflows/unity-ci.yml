@@ -132,13 +132,148 @@ jobs:
           retention-days: 30
 
   # ============================================================
-  # 发布：tag (v*) 时创建 GitHub Release（源码 + 编译产物）
+  # Unity Player 构建（Windows .exe + WebGL）
+  # 需要 UNITY_LICENSE / UNITY_EMAIL / UNITY_PASSWORD 仓库 Secret
+  # License 激活文件 .ulf 获取见 README「获取 Unity Personal License」一节
+  # ============================================================
+  unity_build:
+    name: Unity Player Build (Win64 + WebGL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: validate
+    # 仅当 tag 推送或手动触发；未配置 UNITY_LICENSE 时 job 内部 Activate 步骤会失败，
+    # 但 release job 不依赖此 job，会继续走源码+DLL 兜底发布
+    if: ${{ (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')) && vars.UNITY_LICENSE_CONFIGURED == 'true' }}
+    steps:
+      - name: Checkout repository (full history for LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}-${{ github.sha }}
+          restore-keys: |
+            Library-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}-
+            Library-
+
+      - name: Activate Unity License
+        uses: game-ci/unity-license-activate@v1
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        # 若未配置 secret，本步骤会失败；release 流程仍由 compile job 兜底
+
+      - name: Build Windows x86_64 Standalone
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: .
+          targetPlatform: StandaloneWindows64
+          buildName: TomCatRunner
+          buildsPath: builds/Win64
+          buildMethod: TomCatRunner.Editor.CIBuildScript.BuildWindows64
+
+      - name: Build WebGL
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: .
+          targetPlatform: WebGL
+          buildName: TomCatRunner
+          buildsPath: builds/WebGL
+          buildMethod: TomCatRunner.Editor.CIBuildScript.BuildWebGL
+
+      - name: Return Unity License
+        if: always()
+        uses: game-ci/unity-license-return@v1
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+
+      - name: Pack Windows build
+        run: |
+          cd builds/Win64 && zip -q -r ../../TomCatRunner-Win64.zip . && cd ../..
+          ls -la TomCatRunner-Win64.zip
+
+      - name: Pack WebGL build
+        run: |
+          cd builds/WebGL && zip -q -r ../../TomCatRunner-WebGL.zip . && cd ../..
+          ls -la TomCatRunner-WebGL.zip
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: TomCatRunner-Win64
+          path: TomCatRunner-Win64.zip
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Upload WebGL build
+        uses: actions/upload-artifact@v4
+        with:
+          name: TomCatRunner-WebGL
+          path: TomCatRunner-WebGL.zip
+          if-no-files-found: warn
+          retention-days: 30
+
+  # ============================================================
+  # 部署 WebGL 到 GitHub Pages
+  # ============================================================
+  deploy_pages:
+    name: Deploy WebGL to GitHub Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: unity_build
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Download WebGL build
+        uses: actions/download-artifact@v4
+        with:
+          name: TomCatRunner-WebGL
+          path: webgl
+
+      - name: Unzip into Pages artifact
+        run: |
+          mkdir -p _site
+          unzip -q webgl/TomCatRunner-WebGL.zip -d _site
+          # GitHub Pages 需要 .nojekyll 防止下划线目录被跳过
+          touch _site/.nojekyll
+          ls _site
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
+
+  # ============================================================
+  # 发布：tag (v*) 时创建 GitHub Release（源码 + 编译产物 + Unity Player 产物）
   # ============================================================
   release:
     name: GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: compile
+    needs: [compile]
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Checkout repository
@@ -150,6 +285,23 @@ jobs:
           name: TomCatRunner-Distributables
           path: dist
 
+      - name: Download Windows build
+        uses: actions/download-artifact@v4
+        with:
+          name: TomCatRunner-Win64
+          path: dist
+        continue-on-error: true
+
+      - name: Download WebGL build
+        uses: actions/download-artifact@v4
+        with:
+          name: TomCatRunner-WebGL
+          path: dist
+        continue-on-error: true
+
+      - name: List release assets
+        run: ls -la dist/
+
       - name: Create GitHub Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -158,33 +310,64 @@ jobs:
           cat > release_notes.md <<'EOF'
           # TomCatRunner ${{ github.ref_name }}
 
-          ## 编译产物 (License-Free CI)
-
-          本 Release 由 GitHub Actions 全自动构建：**28 个 C# 程序集零错误编译通过**
-          （引擎引用 + Unity 官方包 + 第三方库 + 全部项目代码）。
+          ## 本次 Release 包含
 
           - `TomCatRunner-source.zip` — 完整源码
-          - `TomCatRunner-compiled-dlls.zip` — CI 编译出的全部程序集 DLL
+          - `TomCatRunner-compiled-dlls.zip` — CI 编译出的全部程序集 DLL（无 License 构建）
+          - `TomCatRunner-Win64.zip` — Windows x86_64 可执行程序（需配置 UNITY_LICENSE secret 才会生成）
+          - `TomCatRunner-WebGL.zip` — WebGL 浏览器版构建包（同上）
 
-          ## 如何在 Unity 中打开
+          ## v2.0.0 关键变更
 
-          1. 安装 Unity **2022.3.62f3** (LTS)
-          2. 用 Unity Hub 打开本项目根目录
-          3. 首次打开时 Unity 会自动生成 .meta 文件与 Library
+          - 新增三个完整场景：**Boot.unity** / **SeasonHub.unity** / **Gameplay.unity**
+          - 新增 8 个 URP/Lit 材质（玩家、障碍、金币、地面、春/夏/冬赛季门）
+          - 新增 4 个 Prefab（Player / Obstacle / Coin / Ground）
+          - 新增 TagManager（Player / Obstacle / Coin / Ground / SeasonGate）
+          - EditorBuildSettings 配齐三场景，Boot 场景已挂 GameLifetimeScope
+          - 新增 Unity Player 构建 job（Windows Standalone + WebGL）
+          - 新增 GitHub Pages 自动部署 job
 
-          > CI 编译管线（`ci/`）不依赖 Unity 许可证，使用 Roslyn +
-          > Unity 2022.3 官方引用程序集复现编辑器内编译行为。
+          ## 如何获取可执行的 .exe / WebGL
 
-          ## 关键修复
+          Unity Player 构建需要 Unity Personal License（**免费**）：
+          1. 注册 Unity ID（https://id.unity.com）
+          2. 在 Unity Hub 登录并激活本机 Personal License
+          3. 在 GitHub repo Settings → Secrets and variables → Actions 添加：
+             - `UNITY_EMAIL`：Unity ID 邮箱
+             - `UNITY_PASSWORD`：Unity ID 密码
+             - `UNITY_LICENSE`：.ulf 许可文件内容（base64 或明文 XML）
+          4. 手动触发 Actions → Unity CI/CD Pipeline → Run workflow
+          5. 构建完成后 .exe 和 WebGL zip 会出现在最新 Release
+
+          ## 如何在 Unity 编辑器中打开
+
+          1. 安装 Unity **2022.3.62f1**（LTS）
+          2. Unity Hub → Open → 选择本仓库根目录
+          3. 首次打开自动导入 VContainer / UniTask / UniRx / Addressables / DOTween
+          4. 打开 `Assets/_Project/Scenes/Boot.unity` 按 ▶ 即可启动
+
+          ## License-Free CI 兜底
+
+          即使未配置 Unity License，本仓库仍可：
+          - 通过 `ci/compile.py` 用 Roslyn 编译全部 27+ 个 C# 程序集零错误
+          - 提供完整源码 + 编译产物 DLL
+          - 在 Unity 编辑器中本地构建 Player
+
+          ## 关键修复历史
 
           - 补齐缺失的 Unity 工程文件（ProjectSettings / Packages/manifest.json）
           - 合并两代架构（Core 流式管线 + Seasons 赛季系统），统一数据模型
-          - 补全缺失模块：UI Framework、ViewModel 基建、Reactive 总线、关卡生成器、LevelValidator
           - 修复 ~120 处编译错误（命名空间、虚构 API、重复类型、过时 API）
           - DOTween 官方 DLL 已内嵌（Plugins/DOTween），项目开箱可用
           EOF
+
+          # 上传所有存在的产物（用 continue-on-error 兼容缺失）
+          ASSETS=""
+          for f in TomCatRunner-source.zip TomCatRunner-compiled-dlls.zip TomCatRunner-Win64.zip TomCatRunner-WebGL.zip; do
+            if [ -f "dist/$f" ]; then ASSETS="$ASSETS dist/$f"; fi
+          done
+
           gh release create "$TAG" \
             --title "TomCatRunner $TAG" \
             --notes-file release_notes.md \
-            dist/TomCatRunner-source.zip \
-            dist/TomCatRunner-compiled-dlls.zip
+            $ASSETS
