@@ -203,12 +203,16 @@ jobs:
 
       - name: Pack Windows build
         run: |
-          cd builds/Win64 && zip -q -r ../../TomCatRunner-Win64.zip . && cd ../..
+          # CIBuildScript.BuildWindowsStandalone 输出到 Builds/Windows/
+          ls -la Builds/Windows/ 2>&1 | head -5
+          cd Builds/Windows && zip -q -r ../../TomCatRunner-Win64.zip . && cd ../..
           ls -la TomCatRunner-Win64.zip
 
       - name: Pack WebGL build
         run: |
-          cd builds/WebGL && zip -q -r ../../TomCatRunner-WebGL.zip . && cd ../..
+          # CIBuildScript.BuildWebGLInternal 输出到 Builds/WebGL/
+          ls -la Builds/WebGL/ 2>&1 | head -5
+          cd Builds/WebGL && zip -q -r ../../TomCatRunner-WebGL.zip . && cd ../..
           ls -la TomCatRunner-WebGL.zip
 
       - name: Upload Windows build
