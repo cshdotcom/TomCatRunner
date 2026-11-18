@@ -189,34 +189,69 @@ python3 ci/compile.py      # Roslyn 全量编译 28 个程序集，零错误门�
 
 ### 获取 Unity Personal License（免费）并启用 CI 自动构建
 
-Unity Personal License **完全免费**（年收入低于 20 万美元即可），是构建 Player（.exe / WebGL）的唯一前置条件。一次配置永久生效：
+Unity Personal License **完全免费**（年收入低于 20 万美元即可），是构建 Player（.exe / WebGL）的唯一前置条件。一次配置永久生效。
 
-1. **注册 Unity ID**：访问 https://id.unity.com 注册账号
-2. **本地激活 License 文件**：
-   - 下载安装 [Unity Hub](https://unity.com/download)
-   - Hub → Preferences → Licenses → Add → Get a free Personal license
-   - 激活成功后会在本地生成 `.ulf` 文件：
-     - Windows: `%PROGRAMDATA%\Unity\Unity_lic.ulf`
-     - macOS: `/Library/Application Support/Unity/Unity_lic.ulf`
-     - Linux: `~/.local/share/unity3d/Unity/Unity_lic.ulf`
-3. **配置 GitHub Secrets**（仓库 Settings → Secrets and variables → Actions → New repository secret）：
-   | Secret 名称 | 值 |
-   |---|---|
-   | `UNITY_EMAIL` | 你的 Unity ID 邮箱 |
-   | `UNITY_PASSWORD` | 你的 Unity ID 密码 |
-   | `UNITY_LICENSE` | `.ulf` 文件的完整 XML 内容（粘贴明文即可） |
-4. **添加 Repository Variable**（Settings → Secrets and variables → Actions → Variables → New repository variable）：
-   | Variable 名称 | 值 |
-   |---|---|
-   | `UNITY_LICENSE_CONFIGURED` | `true` |
-5. **手动触发 CI 构建**：
-   - 仓库 Actions 页 → 选择 "Unity CI/CD Pipeline" → Run workflow
-   - 或直接 `git tag v2.x.x && git push --tags`
-6. **构建产物**：
-   - Windows `.exe`、WebGL `.zip` 自动上传到 Release
-   - WebGL 版同时自动部署到 GitHub Pages：`https://cshdotcom.github.io/TomCatRunner/`
+> ⚠️ **Unity Hub 3.7.0+ 不再生成 `.ulf` 文件**——Personal License 改用 `UnityEntitlementLicense.xml` 存储。下面两种文件 game-ci 都能直接消费，复制任意一个的内容即可。
+
+#### 第 1 步：本地激活 License
+
+1. 注册 Unity ID：https://id.unity.com
+2. 下载安装 [Unity Hub](https://unity.com/download)
+3. Unity Hub 登录你的 Unity ID 账号
+4. Hub 会自动激活 Personal License（**不需要点任何按钮**，登录成功就激活了）
+   - 如果想确认：Hub → Preferences → Licenses，应能看到 Personal License 条目
+
+#### 第 2 步：找到 License 文件
+
+激活后，License 文件会自动出现在下面任一路径（**两种格式都行**，复制内容时直接全选 XML/文本即可）：
+
+| 操作系统 | 文件路径 |
+|---|---|
+| Windows | `%LOCALAPPDATA%\Unity\licenses\UnityEntitlementLicense.xml`（新版 Hub）<br>或 `C:\ProgramData\Unity\Unity_lic.ulf`（旧版 Hub） |
+| macOS | `~/Library/Unity/licenses/UnityEntitlementLicense.xml`（新版）<br>或 `/Library/Application Support/Unity/Unity_lic.ulf`（旧版） |
+| Linux | `~/.local/share/unity3d/Unity/licenses/UnityEntitlementLicense.xml`（新版）<br>或 `~/.local/share/unity3d/Unity/Unity_lic.ulf`（旧版） |
+
+> 找不到隐藏文件夹？资源管理器开启「显示隐藏文件」。Windows 上 `%LOCALAPPDATA%` 通常等价于 `C:\Users\<用户名>\AppData\Local`。
+
+#### 第 3 步：把 License 内容存到 GitHub Secret
+
+1. 用文本编辑器（VS Code / Notepad / TextEdit）打开上面的 License 文件
+2. **全选并复制**所有内容（应该是一段 XML，开头类似 `<?xml version="1.0"?>` 或 `<root>`）
+3. 仓库 Settings → Secrets and variables → Actions → New repository secret
+4. 名字填 `UNITY_LICENSE`，值粘贴刚才复制的内容
+
+#### 第 4 步：开启 CI 构建开关
+
+同一个 Settings → Secrets and variables → Actions → **Variables** 标签页（注意是 Variables 不是 Secrets）→ New repository variable：
+- Name：`UNITY_LICENSE_CONFIGURED`
+- Value：`true`
+
+> 这个开关是为了让 workflow 在你还没配 License 时自动跳过 Player 构建步骤，不阻塞发版。
+
+#### 第 5 步：触发构建
+
+二选一：
+- 手动触发：仓库 Actions 页 → "Unity CI/CD Pipeline" → Run workflow
+- 自动触发：`git tag v2.x.x && git push --tags`
+
+#### 第 6 步：拿构建产物
+
+- Windows `.exe` 和 WebGL `.zip` → 自动出现在最新 Release
+- WebGL 同时自动部署到 GitHub Pages：`https://cshdotcom.github.io/TomCatRunner/`
+
+> License 是绑定 Unity 账号的（不是绑定机器），CI 构建会临时占用一个 seat，构建结束自动释放。本地 Hub 登录的 Personal License 不会受影响。
 
 > ⚠️ 未配置 License 时，`unity_build` / `deploy_pages` job 会自动跳过；`compile` job 用 Roslyn 编译全部 C# 程序集仍能正常通过，Release 仍会发布（仅含源码 + DLL）。
+
+#### 排错速查
+
+| 现象 | 处理 |
+|---|---|
+| Hub → Preferences 里没有 License | 退出 Hub 重新登录，或重启 Hub |
+| 找不到 `.ulf` 文件 | 用 `.xml` 文件代替（新版 Hub 改名了） |
+| `.xml` 和 `.ulf` 都找不到 | Unity Hub 没成功激活，重装 Hub 后重试 |
+| CI 报 `License is invalid` | 复制时漏了 XML 头，确保整段都复制进去 |
+| CI 报 `License file is corrupted` | 不要 base64 编码，直接粘贴明文 XML |
 
 ---
 

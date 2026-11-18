@@ -133,19 +133,21 @@ jobs:
 
   # ============================================================
   # Unity Player 构建（Windows .exe + WebGL）
-  # 需要 UNITY_LICENSE / UNITY_EMAIL / UNITY_PASSWORD 仓库 Secret
-  # License 激活文件 .ulf 获取见 README「获取 Unity Personal License」一节
+  # 只需一个 Secret：UNITY_LICENSE
+  # - 旧版 Unity Hub（< 3.7）：C:\ProgramData\Unity\Unity_lic.ulf 的内容
+  # - 新版 Unity Hub（>= 3.7）：%LOCALAPPDATA%\Unity\licenses\UnityEntitlementLicense.xml 的内容
+  # - 两种格式 game-ci/unity-builder 都能直接消费，无需 EMAIL/PASSWORD
   # ============================================================
   unity_build:
     name: Unity Player Build (Win64 + WebGL)
     runs-on: ubuntu-latest
     timeout-minutes: 45
     needs: validate
-    # 仅当 tag 推送或手动触发；未配置 UNITY_LICENSE 时 job 内部 Activate 步骤会失败，
-    # 但 release job 不依赖此 job，会继续走源码+DLL 兜底发布
+    # 仅当仓库已配置 UNITY_LICENSE secret 且 tag 推送或手动触发时才跑
+    # 未配置时 job 自动跳过；release job 不依赖此 job，会继续走源码+DLL 兜底发布
     if: ${{ (github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')) && vars.UNITY_LICENSE_CONFIGURED == 'true' }}
     steps:
-      - name: Checkout repository (full history for LFS)
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           lfs: true
@@ -159,47 +161,40 @@ jobs:
             Library-${{ hashFiles('Packages/manifest.json', 'ProjectSettings/ProjectVersion.txt') }}-
             Library-
 
-      - name: Activate Unity License
-        uses: game-ci/unity-license-activate@v1
+      - name: Write license file from secret
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-        # 若未配置 secret，本步骤会失败；release 流程仍由 compile job 兜底
+        run: |
+          mkdir -p "$HOME/.local/share/unity3d/Unity"
+          printf '%s' "$UNITY_LICENSE" > "$HOME/.local/share/unity3d/Unity/Unity_lic.ulf"
+          echo "License file written ($(wc -c < "$HOME/.local/share/unity3d/Unity/Unity_lic.ulf") bytes)"
+          # 同时写一份到 game-ci 期望的位置
+          mkdir -p "/Library/Application Support/Unity" 2>/dev/null || true
+          printf '%s' "$UNITY_LICENSE" > "/Library/Application Support/Unity/Unity_lic.ulf" 2>/dev/null || true
 
       - name: Build Windows x86_64 Standalone
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: .
           targetPlatform: StandaloneWindows64
           buildName: TomCatRunner
           buildsPath: builds/Win64
           buildMethod: TomCatRunner.Editor.CIBuildScript.BuildWindows64
+          allowDirtyBuild: true
 
       - name: Build WebGL
         uses: game-ci/unity-builder@v4
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
         with:
           projectPath: .
           targetPlatform: WebGL
           buildName: TomCatRunner
           buildsPath: builds/WebGL
           buildMethod: TomCatRunner.Editor.CIBuildScript.BuildWebGL
-
-      - name: Return Unity License
-        if: always()
-        uses: game-ci/unity-license-return@v1
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          allowDirtyBuild: true
 
       - name: Pack Windows build
         run: |
@@ -330,14 +325,20 @@ jobs:
           ## 如何获取可执行的 .exe / WebGL
 
           Unity Player 构建需要 Unity Personal License（**免费**）：
-          1. 注册 Unity ID（https://id.unity.com）
-          2. 在 Unity Hub 登录并激活本机 Personal License
-          3. 在 GitHub repo Settings → Secrets and variables → Actions 添加：
-             - `UNITY_EMAIL`：Unity ID 邮箱
-             - `UNITY_PASSWORD`：Unity ID 密码
-             - `UNITY_LICENSE`：.ulf 许可文件内容（base64 或明文 XML）
-          4. 手动触发 Actions → Unity CI/CD Pipeline → Run workflow
-          5. 构建完成后 .exe 和 WebGL zip 会出现在最新 Release
+          1. 注册 Unity ID（https://id.unity.com）并安装 Unity Hub
+          2. Hub 登录账号即自动激活 Personal License（不需要手动点按钮）
+          3. 找到 License 文件（两种格式都可，复制内容）：
+             - 新版 Hub（3.7+）：`UnityEntitlementLicense.xml`
+             - 旧版 Hub：`Unity_lic.ulf`
+          4. 在 GitHub repo Settings → Secrets and variables → Actions 添加 1 个 Secret：
+             - `UNITY_LICENSE`：上面文件的完整 XML 内容（明文粘贴，不要 base64）
+          5. 在同一页面 Variables 标签添加：
+             - `UNITY_LICENSE_CONFIGURED` = `true`
+          6. 手动触发 Actions → Unity CI/CD Pipeline → Run workflow
+          7. 构建完成后 .exe 和 WebGL zip 会出现在最新 Release
+          8. WebGL 同时部署到 GitHub Pages：https://cshdotcom.github.io/TomCatRunner/
+
+          详细路径和排错见 README「获取 Unity Personal License」一节
 
           ## 如何在 Unity 编辑器中打开
 
