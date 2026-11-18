@@ -116,23 +116,16 @@ namespace TomCatRunner.Editor.CI
             PlayerSettings.SetGraphicsAPIs(BuildTarget.WebGL, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
 
             // 脚本后端
-            PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.IL2CPP);
+            // 注意：game-ci/unity-builder 默认 docker 镜像不带 IL2CPP 模块
+            // StandaloneWindows64 用 Mono 即可（IL2CPP 需要 windows-il2cpp 镜像）
+            PlayerSettings.SetScriptingBackend(BuildTargetGroup.Standalone, ScriptingImplementation.Mono2x);
+            // WebGL 必须 IL2CPP，game-ci 对 WebGL 会自动用 webgl-il2cpp 镜像
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.WebGL, ScriptingImplementation.IL2CPP);
 
-            // IL2CPP 优化
-            PlayerSettings.SetIl2CppCompilerConfiguration(BuildTargetGroup.Standalone, Il2CppCompilerConfiguration.Release);
-            PlayerSettings.SetIl2CppCompilerConfiguration(BuildTargetGroup.WebGL, Il2CppCompilerConfiguration.Release);
-
-            // 压缩设置
-            PlayerSettings.defaultIsNativeResolution = true;
-            PlayerSettings.runInBackground = true;
-            PlayerSettings.resizableWindow = true;
-            PlayerSettings.captureSingleScreen = false;
-
-            // 优化设置
+            // 优化设置（Mono 后端不能用 High stripping）
             PlayerSettings.stripEngineCode = true;
-            PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.Standalone, ManagedStrippingLevel.High);
-            PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.WebGL, ManagedStrippingLevel.High);
+            PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.Standalone, ManagedStrippingLevel.Minimal);
+            PlayerSettings.SetManagedStrippingLevel(BuildTargetGroup.WebGL, ManagedStrippingLevel.Low);
 
             // WebGL 特定设置
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Brotli;
