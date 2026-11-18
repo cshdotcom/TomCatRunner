@@ -189,30 +189,6 @@ namespace TomCatRunner.Editor.CI
             GenerateVersionInfo(buildPath, "Windows");
         }
 
-        private static void BuildWebGL()
-        {
-            string buildPath = "Builds/WebGL";
-
-            Directory.CreateDirectory(buildPath);
-
-            var scenes = GetBuildScenes();
-            var options = new BuildPlayerOptions
-            {
-                scenes = scenes,
-                locationPathName = buildPath,
-                target = BuildTarget.WebGL,
-                options = BuildOptions.StrictMode
-            };
-
-            Debug.Log($"[CIBuildScript] Building WebGL to: {buildPath}");
-
-            var report = BuildPipeline.BuildPlayer(options);
-            HandleBuildReport(report, "WebGL");
-
-            // 生成版本信息文件
-            GenerateVersionInfo(buildPath, "WebGL");
-        }
-
         private static void BuildAddressables()
         {
             Debug.Log("[CIBuildScript] Building Addressables content...");
