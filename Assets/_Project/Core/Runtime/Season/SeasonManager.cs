@@ -166,6 +166,17 @@ namespace TomCatRunner.Core.Season
                 await _loadHandle.Task;
 
                 Debug.Log($"[SeasonManager] Loaded {_seasonCache.Count} season configs");
+
+                // Addressables 在 settings.json 缺失时不抛异常，仅返回空列表。
+                // 此时若仍为 OfflineMode，主动走 Resources fallback（项目 Resources/Seasons/Configs/ 下
+                // 有 SeasonConfig_S1.asset 可作为兜底赛季）。
+                if (_seasonCache.Count == 0 && _config.OfflineMode)
+                {
+                    Debug.LogWarning("[SeasonManager] Addressables returned 0 seasons, falling back to Resources");
+                    LoadFromResourcesFallback();
+                    return;
+                }
+
                 EvaluateCurrentSeason();
             }
             catch (Exception e)
