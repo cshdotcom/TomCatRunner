@@ -158,10 +158,29 @@ namespace TomCatRunner.Editor.CI
 
             // Input 处理：强制旧 Input Manager（UnityEngine.Input API）
             // InputService.cs 全部用 Input.GetKeyDown / GetAxis / GetTouch / GetMouseButton，
-            // 但 Unity 2022.3 默认 ProjectSettings 把 activeInputHandler 设为 Input System(1)，
+            // 但 Unity 2022.3 默认 activeInputHandler=1 (Input System)，
             // 运行时每帧抛 InvalidOperationException: 'you have switched active Input handling
             // to Input System package'，玩家无法操作。这里显式切回 InputManager(0)。
-            PlayerSettings.activeInputHandler = InputHandler.InputManager;
+            //
+            // 用 reflection 设置，避免 InputHandler 枚举在 Roslyn 兜底编译时不可见
+            // （ci/compile.py 拉的 UnityEditor 引用程序集未必暴露 InputHandler 公开类型）。
+            try
+            {
+                var prop = typeof(PlayerSettings).GetProperty("activeInputHandler");
+                if (prop != null)
+                {
+                    prop.SetValue(null, Enum.ToObject(prop.PropertyType, 0)); // 0 = InputManager (Old)
+                    Debug.Log($"[CIBuildScript] activeInputHandler set to 0 (InputManager) via reflection, type={prop.PropertyType.Name}");
+                }
+                else
+                {
+                    Debug.LogWarning("[CIBuildScript] activeInputHandler property not found on PlayerSettings");
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[CIBuildScript] Failed to set activeInputHandler via reflection: {e.Message}");
+            }
 
             // 脚本后端
             // 注意：game-ci/unity-builder 默认 docker 镜像不带 IL2CPP 模块
