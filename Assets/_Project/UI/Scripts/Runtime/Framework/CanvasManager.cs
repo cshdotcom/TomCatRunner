@@ -21,10 +21,9 @@ namespace TomCatRunner.UI.Framework
         /// <summary>根 RectTransform</summary>
         public RectTransform Root => _rootCanvas != null ? _rootCanvas.transform as RectTransform : null;
 
-        public CanvasManager(Transform parent = null)
+        public CanvasManager()
         {
             var host = new GameObject("[UI] CanvasRoot", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
-            if (parent != null) host.transform.SetParent(parent, false);
 
             _rootCanvas = host.GetComponent<Canvas>();
             _rootCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
