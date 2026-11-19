@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  link.xml — 显式保护 IL2CPP stripping 不裁掉关键类型
+
+  背景：WebGL / Android 用 IL2CPP + Low stripping，会裁掉看似"未引用"
+  的方法/类型。VContainer 内部大量使用反射 + IL Emit 动态生成注册代码，
+  在 IL2CPP 下若 Resolve / Initialize / Tick 等方法被裁会抛：
+    - MethodAccessException: Attempt to access method 'VContainer.IObjectResolver.Resolve' on type '' failed
+    - VContainerException: X is not assignable from VContainer.Unity.IInitializable
+
+  此 link.xml 显式 preserve 整个程序集，避免 stripping 破坏 DI 容器。
+  放在 Assets/ 根目录会被 Unity 自动拾取（构建时合并到默认 linker 描述）。
+-->
+<linker>
+  <!-- VContainer 主体 + Unity 集成层 -->
+  <assembly fullname="VContainer" preserve="all"/>
+  <assembly fullname="VContainer.Unity" preserve="all"/>
+
+  <!-- 第三方反射密集型库 -->
+  <assembly fullname="UniRx" preserve="all"/>
+  <assembly fullname="UniTask" preserve="all"/>
+  <assembly fullname="UniTask.Linq" preserve="all"/>
+  <assembly fullname="UniTask.Addressables" preserve="all"/>
+  <assembly fullname="DOTween" preserve="all"/>
+  <assembly fullname="DOTween.Modules" preserve="all"/>
+
+  <!-- 项目自身程序集（保险起见也保留全部） -->
+  <assembly fullname="TomCatRunner.Common.Runtime" preserve="all"/>
+  <assembly fullname="TomCatRunner.Core.Runtime" preserve="all"/>
+  <assembly fullname="TomCatRunner.UI.Runtime" preserve="all"/>
+  <assembly fullname="TomCatRunner.Seasons.Runtime" preserve="all"/>
+  <assembly fullname="TomCatRunner.Game" preserve="all"/>
+  <assembly fullname="TomCatRunner.Gameplay.Runtime" preserve="all"/>
+
+  <!-- Unity 引擎子系统（VContainer / Addressables 运行时反射访问） -->
+  <assembly fullname="UnityEngine" preserve="all"/>
+  <assembly fullname="UnityEngine.CoreModule" preserve="all"/>
+  <assembly fullname="UnityEngine.UI" preserve="all"/>
+  <assembly fullname="UnityEngine.UIModule" preserve="all"/>
+  <assembly fullname="Unity.Addressables" preserve="all"/>
+  <assembly fullname="Unity.ResourceManager" preserve="all"/>
+</linker>

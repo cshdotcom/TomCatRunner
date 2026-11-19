@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VContainer.Unity;
 using TomCatRunner.Common;
 using TomCatRunner.Common.Reactive;
 
@@ -12,7 +13,7 @@ namespace TomCatRunner.UI.Framework
     /// UI 管理器 - 视图生命周期编排：注册、实例化、显示/隐藏、层级与卸载
     /// 由 GameLifetimeScope 注册为单例并驱动 Tick
     /// </summary>
-    public class UIManager : IDisposable
+    public class UIManager : IInitializable, ITickable, IDisposable
     {
         private readonly CanvasManager _canvasManager;
         private readonly ViewRegistry _registry;
