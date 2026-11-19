@@ -328,6 +328,7 @@
         "UnityEngine.UI",
         "Unity.TextMeshPro",
         "DOTween.Modules",
+        "VContainer",
         "Assets/Plugins/DOTween/DOTween.dll"
       ],
       "defines": [],
