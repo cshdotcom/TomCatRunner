@@ -124,5 +124,6 @@ PlayerSettings:
     Standalone: 6
     Editor: 6
   cameraAndInputTarget: 1
+  activeInputHandler: 0
   vrSettings:
     enable360StereoCapture: 0
