@@ -18,7 +18,18 @@ namespace TomCatRunner.Gameplay.World
             get
             {
                 if (_standardShader == null)
-                    _standardShader = Shader.Find("Standard") ?? Shader.Find("Universal Render Pipeline/Lit");
+                {
+                    // Standard / URP-Lit 在 WebGL IL2CPP build 默认会被 stripping 裁掉
+                    // （除非加入 GraphicsSettings.alwaysIncludedShaders）。
+                    // 必须有非空兜底，否则 new Material(null) 抛 ArgumentNullException(shader)，
+                    // 进而 WorldBuilder.Build() 全部 mesh 用 magenta fallback，画面一片粉红。
+                    _standardShader = Shader.Find("Standard")
+                                      ?? Shader.Find("Universal Render Pipeline/Lit")
+                                      ?? Shader.Find("Mobile/Diffuse")
+                                      ?? Shader.Find("Unlit/Color");
+                    if (_standardShader == null)
+                        Debug.LogError("[WorldPrimitives] No usable shader found! Standard/URP-Lit/Mobile-Diffuse/Unlit-Color all missing.");
+                }
                 return _standardShader;
             }
         }
