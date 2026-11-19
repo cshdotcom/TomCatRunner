@@ -156,6 +156,13 @@ namespace TomCatRunner.Editor.CI
             PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64, new[] { UnityEngine.Rendering.GraphicsDeviceType.Direct3D11 });
             PlayerSettings.SetGraphicsAPIs(BuildTarget.WebGL, new[] { UnityEngine.Rendering.GraphicsDeviceType.OpenGLES3 });
 
+            // Input 处理：强制旧 Input Manager（UnityEngine.Input API）
+            // InputService.cs 全部用 Input.GetKeyDown / GetAxis / GetTouch / GetMouseButton，
+            // 但 Unity 2022.3 默认 ProjectSettings 把 activeInputHandler 设为 Input System(1)，
+            // 运行时每帧抛 InvalidOperationException: 'you have switched active Input handling
+            // to Input System package'，玩家无法操作。这里显式切回 InputManager(0)。
+            PlayerSettings.activeInputHandler = InputHandler.InputManager;
+
             // 脚本后端
             // 注意：game-ci/unity-builder 默认 docker 镜像不带 IL2CPP 模块
             // StandaloneWindows64 用 Mono 即可（IL2CPP 需要 windows-il2cpp 镜像）
